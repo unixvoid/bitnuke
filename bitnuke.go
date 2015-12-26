@@ -2,12 +2,11 @@ package main
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"io"
-	//"io/ioutil"
-	"crypto/rand"
 	//"encoding/base64"
 	"log"
 	"net/http"
@@ -31,9 +30,14 @@ import (
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", landingpage).Methods("GET")
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
 	log.Fatal(http.ListenAndServe(":8888", router))
+}
+
+func landingpage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./upload.html")
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {
