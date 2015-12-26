@@ -33,13 +33,13 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		t.Execute(w, token)
 	} else {
 		r.ParseMultipartForm(32 << 20)
-		file, handler, err := r.FormFile("uploadfile")
+		file, _, err := r.FormFile("uploadfile")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		defer file.Close()
-		fmt.Fprintf(w, "%v", handler.Header)
+		//fmt.Fprintf(w, "%v", handler.Header)
 
 		// generate token and hash to save
 		token := randStr(8)
