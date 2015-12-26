@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/sha3"
 	"html/template"
 	"io"
 	//"encoding/base64"
@@ -45,7 +46,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 	fdata := vars["fdata"]
 
 	// hash the token that is passed
-	hash := md5.Sum([]byte(fdata))
+	hash := sha3.Sum512([]byte(fdata))
 	hashstr := fmt.Sprintf("%x", hash)
 
 	//token := randStr(8)
@@ -87,7 +88,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		// generate token and hash to save
 		token := randStr(8)
 		fmt.Fprintf(w, "%v", token)
-		hash := md5.Sum([]byte(token))
+		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
 		fmt.Println(token)
 

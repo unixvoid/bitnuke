@@ -24,5 +24,6 @@ install: stat
 
 clean:
 	rm -f bitnuke
+	rm -r tmpnuke/*
 
 #CGO_ENABLED=0 go build -a -ldflags '-s' bitnuke.go
