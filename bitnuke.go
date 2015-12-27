@@ -32,13 +32,26 @@ import (
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", landingpage).Methods("GET")
+	router.HandleFunc("/css/style.css", css).Methods("GET")
+	router.HandleFunc("/js/index.js", js).Methods("GET")
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
 
 func landingpage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./upload.html")
+	w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/index.html")
+}
+
+func css(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/css/style.css")
+}
+
+func js(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/js/index.js")
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {
