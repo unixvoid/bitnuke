@@ -11,7 +11,7 @@ body {
   font-family: Lato, Arial;
   color: #fff;
   padding: 55px 25px;
-  background-color: #e74c3c;
+  background-color: #8E44AD;
 }
 
 h1 {
@@ -75,7 +75,7 @@ p a:hover {
   font-size: 16px;
   padding: 11px 17px;
   border: none;
-  background-color: #c0392b;
+  background-color: #948c98;
   -moz-transition: all 0.2s ease-in;
   -o-transition: all 0.2s ease-in;
   -webkit-transition: all 0.2s ease-in;
@@ -84,7 +84,7 @@ p a:hover {
   /* IE 9 Fix */
 }
 .file-upload-input:hover, .file-upload-input:focus {
-  background-color: #ab3326;
+  background-color: #7b727f;
   outline: none;
 }
 
@@ -97,7 +97,7 @@ p a:hover {
   padding: 11px 20px;
   border: none;
   margin-left: -1px;
-  background-color: #962d22;
+  background-color: #6e6672;
   float: left;
   /* IE 9 Fix */
   -moz-transition: all 0.2s ease-in;
@@ -106,5 +106,5 @@ p a:hover {
   transition: all 0.2s ease-in;
 }
 .file-upload-button:hover {
-  background-color: #6d2018;
+  background-color: #544e57;
 }
