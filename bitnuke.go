@@ -36,7 +36,7 @@ func main() {
 	router.HandleFunc("/js/index.js", js).Methods("GET")
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
-	log.Fatal(http.ListenAndServe(":8888", router))
+	log.Fatal(http.ListenAndServe(":8802", router))
 }
 
 func landingpage(w http.ResponseWriter, r *http.Request) {
