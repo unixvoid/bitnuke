@@ -100,8 +100,20 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		// generate token and hash to save
 		token := randStr(8)
-		//fmt.Fprintf(w, "bitnuke.io/%v", token)
-		fmt.Fprintf(w, "<html><a href=\"url\">bitnuke.io/%v</a></html>", token)
+		fmt.Fprintf(w, "<html>"+
+			"<style> "+
+			"body {background-color: #8E44AD;"+
+			"font-family: Lato, Arial;"+
+			"color: #fff;}"+
+			"a:link{color: white;"+
+			"text-decoration: none;"+
+			"font-weight: normal;}"+
+			"a:visited{color: white;"+
+			"text-decoration: none;"+
+			"font-weight: normal;}"+
+			"</style>"+
+			"<h1><a href=\"url\">bitnuke.io/%v</a></h1>"+
+			"</html>", token)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
 		fmt.Println(token)
