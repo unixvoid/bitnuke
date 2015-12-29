@@ -118,7 +118,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
 			"</style>"+
-			"<p><a href=\"https://bitnuke.io/%v\">bitnuke.io/%v</a></p>"+
+			"<p><a href=\"https://bitnuke.io/%v\">https://bitnuke.io/%v</a></p>"+
 			"</html>", token, token)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
