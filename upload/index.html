@@ -8,28 +8,21 @@
 
   <body>
 
+    <!--
     <h1>bitnuke.io<span>upload</span></h1>
+    -->
 
-<div class="custom-file-upload">
-    <!--<label for="file">File: </label>--> 
-	<!-- <input type="file" id="file" name="myfiles[]" multiple /> -->
+    <div class="custom-file-upload">
 
-
-
-<form enctype="multipart/form-data" action="https://bitnuke.io/upload" method="post">
-	  <input type="file" name="uploadfile" />
-	  <!--<input type="file" id="file" name="myfiles[]" multiple />-->
+    <img src="bitnuke.png" alt="bitnuke.io">
+    <form enctype="multipart/form-data" action="https://bitnuke.io/upload" method="post">
+      <input type="file" name="uploadfile" />
       <input type="hidden" name="token" value="{{.}}"/>
-	  <!--<input type="submit" value="upload" />-->
-
-</div>
+    </form>
+    </div>
 
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src="js/index.js"></script>
 
-        <script src="js/index.js"></script>
-
-    
-    
-    
   </body>
 </html>
