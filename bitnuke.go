@@ -111,10 +111,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			//"body {background-color: #d3d3d3;"+
 			//"font-family: Lato, Arial;"+
 			//"color: #fff;}"+
-			"a:link{color: white;"+
+			"a:link{color: black;"+
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
-			"a:visited{color: white;"+
+			"a:visited{color: black;"+
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
 			"</style>"+
