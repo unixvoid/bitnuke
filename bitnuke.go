@@ -34,6 +34,7 @@ func main() {
 	router.HandleFunc("/", landingpage).Methods("GET")
 	router.HandleFunc("/css/style.css", css).Methods("GET")
 	router.HandleFunc("/js/index.js", js).Methods("GET")
+	router.HandleFunc("/bitnuke.png", img).Methods("GET")
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
 	log.Fatal(http.ListenAndServe(":8802", router))
@@ -52,6 +53,11 @@ func css(w http.ResponseWriter, r *http.Request) {
 func js(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "text/html")
 	http.ServeFile(w, r, "./upload/js/index.js")
+}
+
+func img(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/bitnuke.png")
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {
