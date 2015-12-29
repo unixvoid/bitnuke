@@ -108,9 +108,9 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		token := randStr(8)
 		fmt.Fprintf(w, "<html>"+
 			"<style> "+
-			"body {background-color: #8E44AD;"+
-			"font-family: Lato, Arial;"+
-			"color: #fff;}"+
+			//"body {background-color: #d3d3d3;"+
+			//"font-family: Lato, Arial;"+
+			//"color: #fff;}"+
 			"a:link{color: white;"+
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
@@ -118,7 +118,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
 			"</style>"+
-			"<h1><a href=\"https://bitnuke.io/%v\">bitnuke.io/%v</a></h1>"+
+			"<p><a href=\"https://bitnuke.io/%v\">bitnuke.io/%v</a></p>"+
 			"</html>", token, token)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
