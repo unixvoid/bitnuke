@@ -12,9 +12,7 @@ run: bitnuke.go
 
 stage: bitnuke.go
 	make stat
-	make statremote
-	mv bitnuke builddeps/
-	mv remotemanager builddeps/
+	mv bitnuke docker/
 
 stat: bitnuke.go
 	$(CGOR) $(GOC) $(GOFLAGS) bitnuke.go
@@ -24,6 +22,6 @@ install: stat
 
 clean:
 	rm -f bitnuke
-	rm -r tmpnuke/*
+	rm -f docker/bitnuke
 
 #CGO_ENABLED=0 go build -a -ldflags '-s' bitnuke.go
