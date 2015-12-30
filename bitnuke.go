@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -83,8 +84,9 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 		log.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
 	} else {
-		log.Printf("data exists")
-		log.Printf("Responsing to %x", hashstr)
+		//log.Printf("data exists")
+		ip := strings.Split(r.RemoteAddr, ":")[0]
+		log.Printf("Responsing to %s :: from: %s", fdata, ip)
 
 		decodeVal, _ := base64.StdEncoding.DecodeString(val)
 
@@ -92,7 +94,6 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
-		w.Header().Set("token", hashstr)
 		http.ServeFile(w, r, "tmpfile")
 		os.Remove("tmpfile")
 	}
@@ -119,20 +120,12 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		// generate token and hash to save
 		token := randStr(8)
-		fmt.Fprintf(w, "<html>"+
-			"<style> "+
-			"a:link{color: black;"+
-			"text-decoration: none;"+
-			"font-weight: normal;}"+
-			"a:visited{color: black;"+
-			"text-decoration: none;"+
-			"font-weight: normal;}"+
-			"</style>"+
-			"<p><a href=\"https://bitnuke.io/%v\">https://bitnuke.io/%v</a></p>"+
-			"</html>", token, token)
+		w.Header().Set("token", token)
+		fmt.Fprintf(w, "https://bitnuke.io/%s", token)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
-		fmt.Println(token)
+		fmt.Println("uploading:", token)
+		//fmt.Println(token)
 
 		// write file temporarily to get filesize
 		f, _ := os.OpenFile("tmpfile", os.O_WRONLY|os.O_CREATE, 0666)
@@ -158,7 +151,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		fileBase64Str := base64.StdEncoding.EncodeToString(buf)
 
-		println("uploading ", "file")
+		//println("uploading ", "file")
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
