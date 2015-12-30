@@ -164,7 +164,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 		println("uploading ", "file")
 		client.Set(hashstr, fileBase64Str, 0).Err()
-		client.Expire(hashstr, (24 * time.Hour)).Err()
+		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
 	}
 }
