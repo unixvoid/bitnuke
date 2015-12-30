@@ -34,9 +34,11 @@ import (
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", landingpage).Methods("GET")
+	//========handle web page=========
 	router.HandleFunc("/css/style.css", css).Methods("GET")
 	router.HandleFunc("/js/index.js", js).Methods("GET")
 	router.HandleFunc("/bitnuke.png", img).Methods("GET")
+	//========/handle web page========
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
 	log.Fatal(http.ListenAndServe(":8802", router))
@@ -90,6 +92,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
+		w.Header().Set("token", hashstr)
 		http.ServeFile(w, r, "tmpfile")
 		os.Remove("tmpfile")
 	}
