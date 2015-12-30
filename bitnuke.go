@@ -2,18 +2,15 @@ package main
 
 import (
 	"bufio"
-	"golang.org/x/crypto/sha3"
-	//"bytes"
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"github.com/gorilla/mux"
-	//"golang.org/x/crypto/sha3"
+	"golang.org/x/crypto/sha3"
 	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
-	//"encoding/base64"
 	"log"
 	"net/http"
 	"os"
@@ -99,7 +96,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 }
 
 func upload(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method)
+	// get file POST from index
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
 		h := md5.New()
@@ -116,15 +113,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer file.Close()
-		//fmt.Fprintf(w, "%v", handler.Header)
 
 		// generate token and hash to save
 		token := randStr(8)
 		fmt.Fprintf(w, "<html>"+
 			"<style> "+
-			//"body {background-color: #d3d3d3;"+
-			//"font-family: Lato, Arial;"+
-			//"color: #fff;}"+
 			"a:link{color: black;"+
 			"text-decoration: none;"+
 			"font-weight: normal;}"+
@@ -167,12 +160,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
 	}
-}
-
-func tokenserv(w http.ResponseWriter, r *http.Request, data string) {
-	log.Printf("Responsing to", data)
-	item := fmt.Sprintf("./tmpnuke/%s", data)
-	http.ServeFile(w, r, item)
 }
 
 func randStr(strSize int) string {
