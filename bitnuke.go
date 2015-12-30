@@ -1,11 +1,16 @@
 package main
 
 import (
+	"bufio"
+	"golang.org/x/crypto/sha3"
+	//"bytes"
 	"crypto/md5"
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"github.com/gorilla/mux"
-	"golang.org/x/crypto/sha3"
+	//"golang.org/x/crypto/sha3"
+	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
 	//"encoding/base64"
@@ -63,24 +68,33 @@ func img(w http.ResponseWriter, r *http.Request) {
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fdata := vars["fdata"]
+	// init redis client
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 
 	// hash the token that is passed
 	hash := sha3.Sum512([]byte(fdata))
 	hashstr := fmt.Sprintf("%x", hash)
 
-	//token := randStr(8)
-	//log.Printf(token)
-
-	// serve up the hashed token if it exists
-	path := fmt.Sprintf("./tmpnuke/%s", hashstr)
-	// if data exists
-	if _, err := os.Stat(path); err == nil {
-		log.Printf("data exists")
-		tokenserv(w, r, hashstr)
-	}
-	// if data does not exist
-	if _, err := os.Stat(path); err != nil {
+	val, err := client.Get(hashstr).Result()
+	if err != nil {
+		log.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
+	} else {
+		log.Printf("data exists")
+		log.Printf("Responsing to %x", hashstr)
+
+		decodeVal, _ := base64.StdEncoding.DecodeString(val)
+
+		file, _ := os.Create("tmpfile")
+		io.WriteString(file, string(decodeVal))
+		file.Close()
+
+		http.ServeFile(w, r, "tmpfile")
+		os.Remove("tmpfile")
 	}
 }
 
@@ -124,13 +138,33 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		hashstr := fmt.Sprintf("%x", hash)
 		fmt.Println(token)
 
-		f, err := os.OpenFile("./tmpnuke/"+hashstr, os.O_WRONLY|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		// write file temporarily to get filesize
+		f, _ := os.OpenFile("tmpfile", os.O_WRONLY|os.O_CREATE, 0666)
 		defer f.Close()
 		io.Copy(f, file)
+
+		tmpFile, _ := os.Open("tmpfile")
+		defer tmpFile.Close()
+
+		client := redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379",
+			Password: "",
+			DB:       0,
+		})
+
+		fInfo, _ := tmpFile.Stat()
+		var size int64 = fInfo.Size()
+		buf := make([]byte, size)
+
+		// read file content into buffer
+		fReader := bufio.NewReader(tmpFile)
+		fReader.Read(buf)
+
+		fileBase64Str := base64.StdEncoding.EncodeToString(buf)
+
+		println("uploading ", "file")
+		client.Set(hashstr, fileBase64Str, 0).Err()
+		os.Remove("tmpfile")
 	}
 }
 
