@@ -174,10 +174,18 @@
   box-sizing: border-box; }
 
 .dropzone {
+  color: #3f3f3f;
+  height: 200px;
+  width: 700px;
+  border-radius: 5px;
   min-height: 150px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  background: white;
+  border: 2px dashed rgba(0, 0, 0, 0.3);
+  background: #D3D3D3;
   padding: 20px 20px; }
+  .dropzone:hover {
+    background: #BDBDBD;
+    opacity: 3;
+    cursor: pointer; }
   .dropzone.dz-clickable {
     cursor: pointer; }
     .dropzone.dz-clickable * {

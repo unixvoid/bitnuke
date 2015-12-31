@@ -113,6 +113,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 
 func upload(w http.ResponseWriter, r *http.Request) {
 	// get file POST from index
+	fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
 		h := md5.New()
@@ -125,6 +126,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
 		file, _, err := r.FormFile("uploadfile")
 		if err != nil {
+			token := randStr(8)
+			w.Header().Set("token", token)
+			fmt.Fprintf(w, "https://bitnuke.io/%s", token)
+			fmt.Println("deez")
 			fmt.Println(err)
 			return
 		}
@@ -134,10 +139,11 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		token := randStr(8)
 		w.Header().Set("token", token)
 		fmt.Fprintf(w, "https://bitnuke.io/%s", token)
+
+		// done with client, rest is server side
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
 		fmt.Println("uploading:", token)
-		//fmt.Println(token)
 
 		// write file temporarily to get filesize
 		f, _ := os.OpenFile("tmpfile", os.O_WRONLY|os.O_CREATE, 0666)
