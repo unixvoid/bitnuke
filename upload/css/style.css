@@ -46,6 +46,10 @@ p a:hover {
   background-color: #ab3326;
 }
 
+#logo {
+  padding: 40px;
+}
+
 #writezone {
   color: #3f3f3f;
 }
