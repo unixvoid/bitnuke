@@ -7,11 +7,10 @@
 }
 
 body {
-  font-family: Arial;
-  color: #8E44AD;
+  font-family: "Courier New", Courier, monospace;
+  color: #3f3f3f;
   padding: 55px 25px;
   background-color: #d3d3d3;
-  //background-color: #8E44AD; F3F4F5
 }
 
 h1 {
