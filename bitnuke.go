@@ -39,10 +39,12 @@ func main() {
 	router.HandleFunc("/css/style.css", css).Methods("GET")
 	router.HandleFunc("/js/index.js", js).Methods("GET")
 	router.HandleFunc("/bitnuke.png", img).Methods("GET")
+	router.HandleFunc("/js/dropzone.js", dropjs).Methods("GET")
+	router.HandleFunc("/css/dropzone.css", dropcss).Methods("GET")
 	//========/handle web page========
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	router.HandleFunc("/upload", upload)
-	log.Fatal(http.ListenAndServe(":8802", router))
+	log.Fatal(http.ListenAndServe(":8803", router))
 }
 
 func landingpage(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +65,16 @@ func js(w http.ResponseWriter, r *http.Request) {
 func img(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "text/html")
 	http.ServeFile(w, r, "./upload/bitnuke.png")
+}
+
+func dropjs(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/js/dropzone.js")
+}
+
+func dropcss(w http.ResponseWriter, r *http.Request) {
+	//w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, "./upload/css/dropzone.css")
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {

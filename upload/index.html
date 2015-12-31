@@ -21,7 +21,7 @@
     <img src="bitnuke.png" alt="bitnuke.io">
     <form class="dropzone" id="droppy" enctype="multipart/form-data" action="http://192.168.1.2:8803/upload" method="post">
 	    <!--<input type="file" name="uploadfile" />-->
-      <input type="hidden" name="token" value="{{.}}"/>
+	    <!--<input type="hidden" name="token" value="{{.}}"/>-->
     </form>
     </div>
 
@@ -29,7 +29,9 @@
       Dropzone.options.droppy = {
         paramName: "file",
         init: function() {
-	  this.on("success", function(file) { console.log("success"); });
+	  this.on("success", function(file) {
+	    document.getElementById("droppy").submit();
+	  });
 	}
       };
 
