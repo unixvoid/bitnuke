@@ -20,11 +20,13 @@
 
 	<center>
     <div id="dropzone">
-    <form id="droppy" enctype="multipart/form-data" class="dropzone" method="post" action="http://localhost:8803/upload">
-	    <!--<input type="file" name="uploadfile" />-->
-	    <!--<input type="hidden" name="token" value="{{.}}"/>-->
-	  </div>
-    </form>
+      <form id="droppy" enctype="multipart/form-data" class="dropzone" method="post" action="http://localhost:8803/upload">
+	      <!--<input type="file" name="uploadfile" />-->
+	      <!--<input type="hidden" name="token" value="{{.}}"/>-->
+	    <div class="dz-message">
+		  </br>Drop or click to upload
+	    </div>
+      </form>
     </div>
 	</center>
 
