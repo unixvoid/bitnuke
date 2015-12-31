@@ -124,11 +124,8 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		t.Execute(w, token)
 	} else {
 		r.ParseMultipartForm(32 << 20)
-		file, _, err := r.FormFile("uploadfile")
+		file, _, err := r.FormFile("file")
 		if err != nil {
-			token := randStr(8)
-			w.Header().Set("token", token)
-			fmt.Fprintf(w, "https://bitnuke.io/%s", token)
 			fmt.Println("deez")
 			fmt.Println(err)
 			return
@@ -138,7 +135,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		// generate token and hash to save
 		token := randStr(8)
 		w.Header().Set("token", token)
-		fmt.Fprintf(w, "https://bitnuke.io/%s", token)
+		fmt.Fprintf(w, "%s", token)
 
 		// done with client, rest is server side
 		hash := sha3.Sum512([]byte(token))

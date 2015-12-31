@@ -45,7 +45,9 @@
 	        //document.getElementById("droppy").submit();
 			console.log(response);
 			this.removeAllFiles();
-	        document.getElementById("writezone").innerHTML = window.location.href + response;
+
+
+			document.getElementById("writezone").innerHTML = (window.location.href + response).link(window.location.href + response);
 	      });
 	    }
       };

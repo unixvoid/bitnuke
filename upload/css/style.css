@@ -46,10 +46,14 @@ p a:hover {
   background-color: #ab3326;
 }
 
-.dropper {
-  border 2px dashed #0087F7
-  border-radius: 5px;
-  backgrount: #FFF none repeat scroll 0% 0%;
+#writezone {
+  color: #3f3f3f;
+}
+
+#writezone a {
+  color: #3f3f3f;
+  text-decoration: none;
+  font-weight: normal;
 }
 
 .custom-file-upload-hidden {
