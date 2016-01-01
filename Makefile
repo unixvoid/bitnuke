@@ -13,7 +13,7 @@ run: bitnuke.go
 stage: bitnuke.go
 	make stat
 	mv bitnuke docker/
-	cp -R upload/ docker/
+	cp -R static/ docker/
 
 stat: bitnuke.go
 	$(CGOR) $(GOC) $(GOFLAGS) bitnuke.go
@@ -24,6 +24,6 @@ install: stat
 clean:
 	rm -f bitnuke
 	rm -f docker/bitnuke
-	rm -rf docker/upload/
+	rm -rf docker/static/
 
 #CGO_ENABLED=0 go build -a -ldflags '-s' bitnuke.go
