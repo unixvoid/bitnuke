@@ -3,42 +3,30 @@
   <head>
     <meta charset="UTF-8">
     <title>.bitnuke</title>
-        <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
   </head>
 
   <body>
-
-    <!--
-    <h1>bitnuke.io<span>upload</span></h1>
-    -->
     <script src="js/dropzone.js"></script>
     <link rel="stylesheet" href="css/dropzone.css">
 
-	<center>
-    <img src="bitnuke.png" alt="bitnuke.io" id=logo>
-	</center>
+    <center><img src="bitnuke.png" alt="bitnuke.io" id=logo></center>
 
 	<center>
     <div id="dropzone">
-			<!--<form id="droppy" enctype="multipart/form-data" class="dropzone" method="post" action="http://localhost:8803/upload">-->
       <form id="droppy" class="dropzone" action="/upload">
-	      <!--<input type="file" name="uploadfile" />-->
-	      <!--<input type="hidden" name="token" value="{{.}}"/>-->
 	    <div class="dz-message">
 		  </br>Drop or click to upload
 	    </div>
       </form>
-    </div>
-	</br>
-    <div id=writezone>
-    </div>
+    </div></br>
+    <div id=writezone></div>
 	</center>
 
     <script>
       Dropzone.options.droppy = {
-		method: "post",
-		//maxFiles: 1,
-		maxFilesize: 512,
+	    method: "post",
+        maxFilesize: 512,
 	    autoDiscover: false,
         init: function() {
 	      this.on("success", function(file, response) {
