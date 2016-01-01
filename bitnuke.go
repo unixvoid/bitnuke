@@ -40,7 +40,7 @@ func main() {
 	//========/handle web page========
 	router.HandleFunc("/upload", upload)
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8803", router))
+	log.Fatal(http.ListenAndServe(":8802", router))
 }
 
 func landingpage(w http.ResponseWriter, r *http.Request) {
