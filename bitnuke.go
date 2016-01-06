@@ -34,24 +34,9 @@ import (
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	//========handle web page=========
-	router.HandleFunc("/", landingpage).Methods("GET")
-	router.HandleFunc("/static/{fdata}", handlerstatic).Methods("GET")
-	//========/handle web page========
 	router.HandleFunc("/upload", upload)
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8802", router))
-}
-
-func landingpage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	http.ServeFile(w, r, "./static/index.html")
-}
-
-func handlerstatic(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fdata := vars["fdata"]
-	http.ServeFile(w, r, "static/"+fdata)
+	log.Fatal(http.ListenAndServe(":8808", router))
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +88,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
 		file, _, err := r.FormFile("file")
 		if err != nil {
-			fmt.Println("deez")
 			fmt.Println(err)
 			return
 		}
