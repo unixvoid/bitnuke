@@ -103,7 +103,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
 		file, _, err := r.FormFile("file")
 		if err != nil {
-			fmt.Println("deez")
 			fmt.Println(err)
 			return
 		}
