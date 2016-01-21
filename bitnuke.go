@@ -35,6 +35,7 @@ import (
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/upload", upload)
+	router.HandleFunc("/compress", linkcompressor)
 	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8808", router))
 }
@@ -132,6 +133,15 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
 	}
+}
+
+func linkcompressor(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fdata := vars["fdata"]
+
+	token := randStr(4)
+	w.Header().Set("compressor", token)
+	fmt.Fprintf(w, "%s", token)
 }
 
 func randStr(strSize int) string {
