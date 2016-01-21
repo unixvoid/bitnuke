@@ -136,12 +136,54 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func linkcompressor(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fdata := vars["fdata"]
+	//  vars := mux.Vars(r)
+	//  fdata := vars["fdata"]
+	//  // only one space or invalid '/compress <content>'
+	//  if strings.Count(fdata, " ") > 1 {
+	//  	println("not proper syntax")
+	//  	return
+	//  }
+	if r.Method == "GET" {
+		crutime := time.Now().Unix()
+		h := md5.New()
+		io.WriteString(h, strconv.FormatInt(crutime, 10))
+		token := fmt.Sprintf("%x", h.Sum(nil))
 
-	token := randStr(4)
-	w.Header().Set("compressor", token)
-	fmt.Fprintf(w, "%s", token)
+		t, _ := template.ParseFiles("upload.gtpl")
+		t.Execute(w, token)
+	} else {
+		r.ParseMultipartForm(32 << 20)
+		content := r.FormValue("file")
+		//if err != nil {
+		//	fmt.Println(err)
+		//	return
+		//}
+		//defer file.Close()
+		//println("parsing")
+		//println(dankloot)
+
+		// parse content
+		page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
+		content64Str := base64.StdEncoding.EncodeToString([]byte(page))
+		// generate token and hash it to store in db
+		token := randStr(4)
+		hash := sha3.Sum512([]byte(token))
+		hashstr := fmt.Sprintf("%x", hash)
+
+		// initialize db conneciton
+		client := redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379",
+			Password: "",
+			DB:       0,
+		})
+
+		// throw it in the db
+		client.Set(hashstr, content64Str, 0).Err()
+		client.Expire(hashstr, (12 * time.Hour)).Err()
+		// return token to client
+		w.Header().Set("compressor", token)
+		fmt.Fprintf(w, "%s", token)
+	}
 }
 
 func randStr(strSize int) string {
