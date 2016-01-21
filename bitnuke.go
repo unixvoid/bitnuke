@@ -136,13 +136,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func linkcompressor(w http.ResponseWriter, r *http.Request) {
-	//  vars := mux.Vars(r)
-	//  fdata := vars["fdata"]
-	//  // only one space or invalid '/compress <content>'
-	//  if strings.Count(fdata, " ") > 1 {
-	//  	println("not proper syntax")
-	//  	return
-	//  }
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
 		h := md5.New()
@@ -154,15 +147,10 @@ func linkcompressor(w http.ResponseWriter, r *http.Request) {
 	} else {
 		r.ParseMultipartForm(32 << 20)
 		content := r.FormValue("file")
-		//if err != nil {
-		//	fmt.Println(err)
-		//	return
-		//}
-		//defer file.Close()
-		//println("parsing")
-		//println(dankloot)
 
 		// parse content
+		// for now we return a html page, might end up doing a 301 redirect
+		//  see here: https://gist.github.com/hSATAC/5343225
 		page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
 		content64Str := base64.StdEncoding.EncodeToString([]byte(page))
 		// generate token and hash it to store in db
