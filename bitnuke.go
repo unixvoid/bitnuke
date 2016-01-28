@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/sha3"
@@ -33,36 +34,39 @@ import (
 */
 
 func main() {
-	router := mux.NewRouter().StrictSlash(true)
-	//========handle web page=========
-	router.HandleFunc("/", landingpage).Methods("GET")
-	router.HandleFunc("/static/{fdata}", handlerstatic).Methods("GET")
-	//========/handle web page========
-	router.HandleFunc("/upload", upload)
-	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8802", router))
-}
+	redishost := flag.String("redishost", "localhost", "redis server host/ip")
+	redisport := flag.String("redisport", "6379", "redis server port")
+	listenport := flag.String("port", "8808", "bitnuke listening port")
+	flag.Parse()
 
-func landingpage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	http.ServeFile(w, r, "./static/index.html")
-}
-
-func handlerstatic(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fdata := vars["fdata"]
-	http.ServeFile(w, r, "static/"+fdata)
-}
-
-func handlerdynamic(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fdata := vars["fdata"]
-	// init redis client
+	redisaddr := fmt.Sprint(*redishost, ":", *redisport)
+	bitport := fmt.Sprint(":", *listenport)
+	println("bitnuke running on", *listenport)
+	println("link to redis on", redisaddr)
+	// initialize redis connection
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     redisaddr,
 		Password: "",
 		DB:       0,
 	})
+
+	// all handlers. lookin funcy casue i have to pass redis handler
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		upload(w, r, client)
+	})
+	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
+		linkcompressor(w, r, client)
+	})
+	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
+		handlerdynamic(w, r, client)
+	}).Methods("GET")
+	log.Fatal(http.ListenAndServe(bitport, router))
+}
+
+func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client) {
+	vars := mux.Vars(r)
+	fdata := vars["fdata"]
 
 	// hash the token that is passed
 	hash := sha3.Sum512([]byte(fdata))
@@ -88,7 +92,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func upload(w http.ResponseWriter, r *http.Request) {
+func upload(w http.ResponseWriter, r *http.Request, client *redis.Client) {
 	// get file POST from index
 	//fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
@@ -126,12 +130,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		tmpFile, _ := os.Open("tmpfile")
 		defer tmpFile.Close()
 
-		client := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
-		})
-
 		fInfo, _ := tmpFile.Stat()
 		var size int64 = fInfo.Size()
 		buf := make([]byte, size)
@@ -146,6 +144,38 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
+	}
+}
+
+func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client) {
+	if r.Method == "GET" {
+		crutime := time.Now().Unix()
+		h := md5.New()
+		io.WriteString(h, strconv.FormatInt(crutime, 10))
+		token := fmt.Sprintf("%x", h.Sum(nil))
+
+		t, _ := template.ParseFiles("upload.gtpl")
+		t.Execute(w, token)
+	} else {
+		r.ParseMultipartForm(32 << 20)
+		content := r.FormValue("file")
+
+		// parse content
+		// for now we return a html page, might end up doing a 301 redirect
+		//  see here: https://gist.github.com/hSATAC/5343225
+		page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
+		content64Str := base64.StdEncoding.EncodeToString([]byte(page))
+		// generate token and hash it to store in db
+		token := randStr(4)
+		hash := sha3.Sum512([]byte(token))
+		hashstr := fmt.Sprintf("%x", hash)
+
+		// throw it in the db
+		client.Set(hashstr, content64Str, 0).Err()
+		client.Expire(hashstr, (12 * time.Hour)).Err()
+		// return token to client
+		w.Header().Set("compressor", token)
+		fmt.Fprintf(w, "%s", token)
 	}
 }
 
