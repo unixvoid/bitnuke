@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/sha3"
@@ -33,12 +34,23 @@ import (
 */
 
 func main() {
+	redishost := flag.String("redishost", "localhost", "redis server host/ip")
+	redisport := flag.String("redisport", "6379", "redis server port")
+	listenport := flag.String("port", "8808", "bitnuke listening port")
+	flag.Parse()
+
+	redisaddr := fmt.Sprint(*redishost, ":", *redisport)
+	bitport := fmt.Sprint(":", *listenport)
+	println("bitnuke running on", *listenport)
+	println("link to redis on", redisaddr)
+	// initialize redis connection
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     redisaddr,
 		Password: "",
 		DB:       0,
 	})
 
+	// all handlers. lookin funcy casue i have to pass redis handler
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		upload(w, r, client)
@@ -49,7 +61,7 @@ func main() {
 	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
 		handlerdynamic(w, r, client)
 	}).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8808", router))
+	log.Fatal(http.ListenAndServe(bitport, router))
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client) {
