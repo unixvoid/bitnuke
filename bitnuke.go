@@ -33,22 +33,28 @@ import (
 */
 
 func main() {
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/upload", upload)
-	router.HandleFunc("/compress", linkcompressor)
-	router.HandleFunc("/{fdata}", handlerdynamic).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8808", router))
-}
-
-func handlerdynamic(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fdata := vars["fdata"]
-	// init redis client
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
+
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		upload(w, r, client)
+	})
+	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
+		linkcompressor(w, r, client)
+	})
+	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
+		handlerdynamic(w, r, client)
+	}).Methods("GET")
+	log.Fatal(http.ListenAndServe(":8808", router))
+}
+
+func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client) {
+	vars := mux.Vars(r)
+	fdata := vars["fdata"]
 
 	// hash the token that is passed
 	hash := sha3.Sum512([]byte(fdata))
@@ -74,7 +80,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func upload(w http.ResponseWriter, r *http.Request) {
+func upload(w http.ResponseWriter, r *http.Request, client *redis.Client) {
 	// get file POST from index
 	//fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
@@ -112,12 +118,6 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		tmpFile, _ := os.Open("tmpfile")
 		defer tmpFile.Close()
 
-		client := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
-		})
-
 		fInfo, _ := tmpFile.Stat()
 		var size int64 = fInfo.Size()
 		buf := make([]byte, size)
@@ -135,7 +135,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func linkcompressor(w http.ResponseWriter, r *http.Request) {
+func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client) {
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
 		h := md5.New()
@@ -157,13 +157,6 @@ func linkcompressor(w http.ResponseWriter, r *http.Request) {
 		token := randStr(4)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
-
-		// initialize db conneciton
-		client := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
-		})
 
 		// throw it in the db
 		client.Set(hashstr, content64Str, 0).Err()
