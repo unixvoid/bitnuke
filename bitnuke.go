@@ -55,7 +55,7 @@ func main() {
 	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		upload(w, r, client, "temp")
 	})
-	router.HandleFunc("/static", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/supload", func(w http.ResponseWriter, r *http.Request) {
 		upload(w, r, client, "persist")
 	})
 	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
