@@ -21,7 +21,7 @@ import (
 )
 
 /*
-//=====================================
+//================================================================
 // general strategy:
 // we take in a file, the filename is a hashed random string.
 // the file is stored with its filename as the hased string.
@@ -30,7 +30,7 @@ import (
 // now when the user wants to retrive the file, he puts in the
 // token (random string from earlier). his request is hashed and
 // the stored has is returned. ez
-//=====================================
+//================================================================
 */
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	// all handlers. lookin funcy casue i have to pass redis handler
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		upload(w, r, client, "temp")
+		upload(w, r, client, "tmp")
 	})
 	router.HandleFunc("/supload", func(w http.ResponseWriter, r *http.Request) {
 		upload(w, r, client, "persist")
@@ -145,8 +145,9 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 
 		//println("uploading ", "file")
 		client.Set(hashstr, fileBase64Str, 0).Err()
-		if state == "tmp" {
+		if strings.EqualFold(state, "tmp") {
 			client.Expire(hashstr, (12 * time.Hour)).Err()
+			fmt.Println("expire link generated")
 		}
 		os.Remove("tmpfile")
 	}
