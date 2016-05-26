@@ -1,0 +1,9 @@
+[bitnuke]
+	port			= 8808
+	tokensize		= 5
+	linktokensize	= 4
+	ttl				= 12
+
+[redis]
+	host			= "localhost"
+	port			= 6379

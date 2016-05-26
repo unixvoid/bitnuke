@@ -5,10 +5,10 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/sha3"
+	"gopkg.in/gcfg.v1"
 	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
@@ -33,15 +33,33 @@ import (
 //================================================================
 */
 
-func main() {
-	redishost := flag.String("redishost", "localhost", "redis server host/ip")
-	redisport := flag.String("redisport", "6379", "redis server port")
-	listenport := flag.String("port", "8808", "bitnuke listening port")
-	flag.Parse()
+type Config struct {
+	Bitnuke struct {
+		Port          int
+		TokenSize     int
+		LinkTokenSize int
+		TTL           time.Duration
+	}
+	Redis struct {
+		Host string
+		Port int
+	}
+}
 
-	redisaddr := fmt.Sprint(*redishost, ":", *redisport)
-	bitport := fmt.Sprint(":", *listenport)
-	println("bitnuke running on", *listenport)
+var (
+	config = Config{}
+)
+
+func main() {
+	err := gcfg.ReadFileInto(&config, "config.gcfg")
+	if err != nil {
+		fmt.Printf("Could not load config.gcfg, error: %s\n", err)
+		return
+	}
+
+	redisaddr := fmt.Sprint(config.Redis.Host, ":", config.Redis.Port)
+	bitport := fmt.Sprint(":", config.Bitnuke.Port)
+	println("bitnuke running on", config.Bitnuke.Port)
 	println("link to redis on", redisaddr)
 	// initialize redis connection
 	client := redis.NewClient(&redis.Options{
@@ -116,7 +134,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		defer file.Close()
 
 		// generate token and hash to save
-		token := randStr(8)
+		token := randStr(config.Bitnuke.TokenSize)
 		w.Header().Set("token", token)
 		fmt.Fprintf(w, "%s", token)
 
@@ -146,7 +164,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		//println("uploading ", "file")
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		if strings.EqualFold(state, "tmp") {
-			client.Expire(hashstr, (12 * time.Hour)).Err()
+			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 			//fmt.Println("expire link generated")
 		}
 		os.Remove("tmpfile")
@@ -163,13 +181,13 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 	fmt.Println(page)
 	content64Str := base64.StdEncoding.EncodeToString([]byte(page))
 	// generate token and hash it to store in db
-	token := randStr(4)
+	token := randStr(config.Bitnuke.LinkTokenSize)
 	hash := sha3.Sum512([]byte(token))
 	hashstr := fmt.Sprintf("%x", hash)
 
 	// throw it in the db
 	client.Set(hashstr, content64Str, 0).Err()
-	client.Expire(hashstr, (12 * time.Hour)).Err()
+	client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 	// return token to client
 	w.Header().Set("compressor", token)
 	fmt.Fprintf(w, "%s", token)
