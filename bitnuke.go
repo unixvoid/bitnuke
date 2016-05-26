@@ -29,7 +29,7 @@ import (
 //
 // now when the user wants to retrive the file, he puts in the
 // token (random string from earlier). his request is hashed and
-// the stored has is returned. ez
+// the stored hash is returned. ez
 //================================================================
 */
 
@@ -147,42 +147,32 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		if strings.EqualFold(state, "tmp") {
 			client.Expire(hashstr, (12 * time.Hour)).Err()
-			fmt.Println("expire link generated")
+			//fmt.Println("expire link generated")
 		}
 		os.Remove("tmpfile")
 	}
 }
 
 func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client) {
-	if r.Method == "GET" {
-		crutime := time.Now().Unix()
-		h := md5.New()
-		io.WriteString(h, strconv.FormatInt(crutime, 10))
-		token := fmt.Sprintf("%x", h.Sum(nil))
-
-		t, _ := template.ParseFiles("upload.gtpl")
-		t.Execute(w, token)
-	} else {
-		r.ParseMultipartForm(32 << 20)
-		content := r.FormValue("file")
-
-		// parse content
-		// for now we return a html page, might end up doing a 301 redirect
-		//  see here: https://gist.github.com/hSATAC/5343225
-		page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
-		content64Str := base64.StdEncoding.EncodeToString([]byte(page))
-		// generate token and hash it to store in db
-		token := randStr(4)
-		hash := sha3.Sum512([]byte(token))
-		hashstr := fmt.Sprintf("%x", hash)
-
-		// throw it in the db
-		client.Set(hashstr, content64Str, 0).Err()
-		client.Expire(hashstr, (12 * time.Hour)).Err()
-		// return token to client
-		w.Header().Set("compressor", token)
-		fmt.Fprintf(w, "%s", token)
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Println("error during form parse")
 	}
+	content := r.PostFormValue("link")
+	page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
+	fmt.Println(page)
+	content64Str := base64.StdEncoding.EncodeToString([]byte(page))
+	// generate token and hash it to store in db
+	token := randStr(4)
+	hash := sha3.Sum512([]byte(token))
+	hashstr := fmt.Sprintf("%x", hash)
+
+	// throw it in the db
+	client.Set(hashstr, content64Str, 0).Err()
+	client.Expire(hashstr, (12 * time.Hour)).Err()
+	// return token to client
+	w.Header().Set("compressor", token)
+	fmt.Fprintf(w, "%s", token)
 }
 
 func randStr(strSize int) string {
