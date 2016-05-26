@@ -134,7 +134,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		defer file.Close()
 
 		// generate token and hash to save
-		token := randStr(config.Bitnuke.TokenSize)
+		token := tokenGen(config.Bitnuke.TokenSize, client)
 		w.Header().Set("token", token)
 		fmt.Fprintf(w, "%s", token)
 
@@ -181,7 +181,7 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 	fmt.Println(page)
 	content64Str := base64.StdEncoding.EncodeToString([]byte(page))
 	// generate token and hash it to store in db
-	token := randStr(config.Bitnuke.LinkTokenSize)
+	token := tokenGen(config.Bitnuke.LinkTokenSize, client)
 	hash := sha3.Sum512([]byte(token))
 	hashstr := fmt.Sprintf("%x", hash)
 
@@ -193,13 +193,36 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 	fmt.Fprintf(w, "%s", token)
 }
 
+func tokenGen(strSize int, client *redis.Client) string {
+	// generate new token
+	token := randStr(strSize)
+	// hash token
+	hash := sha3.Sum512([]byte(token))
+	hashstr := fmt.Sprintf("%x", hash)
+
+	_, err := client.Get(hashstr).Result()
+
+	for err != redis.Nil {
+		fmt.Println("DEBUG :: COLLISION")
+		token = randStr(strSize)
+		hash := sha3.Sum512([]byte(token))
+		hashstr := fmt.Sprintf("%x", hash)
+
+		_, err = client.Get(hashstr).Result()
+		time.Sleep(time.Second * 1)
+	}
+	return token
+}
+
 func randStr(strSize int) string {
-	dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	//dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	dictionary := "abcdef"
 
 	var bytes = make([]byte, strSize)
 	rand.Read(bytes)
 	for k, v := range bytes {
 		bytes[k] = dictionary[v%byte(len(dictionary))]
 	}
+
 	return string(bytes)
 }
