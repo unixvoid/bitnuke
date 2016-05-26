@@ -3,6 +3,7 @@
 	tokensize		= 6
 	linktokensize	= 4
 	ttl				= 12
+	tokendictionary = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 [redis]
 	host			= "localhost"

@@ -35,10 +35,11 @@ import (
 
 type Config struct {
 	Bitnuke struct {
-		Port          int
-		TokenSize     int
-		LinkTokenSize int
-		TTL           time.Duration
+		Port            int
+		TokenSize       int
+		LinkTokenSize   int
+		TokenDictionary string
+		TTL             time.Duration
 	}
 	Redis struct {
 		Host string
@@ -209,6 +210,7 @@ func tokenGen(strSize int, client *redis.Client) string {
 		hashstr := fmt.Sprintf("%x", hash)
 
 		_, err = client.Get(hashstr).Result()
+		// do not ddos box if db is full
 		time.Sleep(time.Second * 1)
 	}
 	return token
@@ -216,7 +218,7 @@ func tokenGen(strSize int, client *redis.Client) string {
 
 func randStr(strSize int) string {
 	//dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	dictionary := "abcdef"
+	dictionary := config.Bitnuke.TokenDictionary
 
 	var bytes = make([]byte, strSize)
 	rand.Read(bytes)
