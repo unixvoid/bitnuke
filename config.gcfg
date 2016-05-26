@@ -1,6 +1,6 @@
 [bitnuke]
 	port			= 8808
-	tokensize		= 5
+	tokensize		= 6
 	linktokensize	= 4
 	ttl				= 12
 
