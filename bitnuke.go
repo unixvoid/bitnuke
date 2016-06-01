@@ -168,6 +168,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 			fmt.Println("expire link generated")
 		} else {
+			client.Persist(hashstr).Err()
 			fmt.Println("persistent link generated")
 		}
 		os.Remove("tmpfile")
@@ -199,11 +200,14 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 func tokenGen(strSize int, client *redis.Client) string {
 	// generate new token
 	token := randStr(strSize)
+	println(token)
 	// hash token
 	hash := sha3.Sum512([]byte(token))
 	hashstr := fmt.Sprintf("%x", hash)
+	println(hashstr)
 
-	_, err := client.Get(hashstr).Result()
+	test, err := client.Get(hashstr).Result()
+	println(test)
 
 	for err != redis.Nil {
 		fmt.Println("DEBUG :: COLLISION")
