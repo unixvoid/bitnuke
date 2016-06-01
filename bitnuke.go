@@ -166,7 +166,9 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		if strings.EqualFold(state, "tmp") {
 			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
-			//fmt.Println("expire link generated")
+			fmt.Println("expire link generated")
+		} else {
+			fmt.Println("persistent link generated")
 		}
 		os.Remove("tmpfile")
 	}
