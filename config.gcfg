@@ -8,3 +8,6 @@
 [redis]
 	host			= "localhost"
 	port			= 6379
+
+[server]
+	loglevel		= "debug"
