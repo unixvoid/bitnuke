@@ -6,11 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/unixvoid/glogger"
-	"golang.org/x/crypto/sha3"
-	"gopkg.in/gcfg.v1"
-	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -19,6 +14,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/unixvoid/glogger"
+	"golang.org/x/crypto/sha3"
+	"gopkg.in/gcfg.v1"
+	"gopkg.in/redis.v3"
 )
 
 /*
