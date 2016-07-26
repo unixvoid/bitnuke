@@ -5,10 +5,10 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/sha3"
-	"gopkg.in/gcfg.v1"
 	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
@@ -21,7 +21,7 @@ import (
 )
 
 /*
-//================================================================
+//=====================================
 // general strategy:
 // we take in a file, the filename is a hashed random string.
 // the file is stored with its filename as the hased string.
@@ -29,38 +29,19 @@ import (
 //
 // now when the user wants to retrive the file, he puts in the
 // token (random string from earlier). his request is hashed and
-// the stored hash is returned. ez
-//================================================================
+// the stored has is returned. ez
+//=====================================
 */
 
-type Config struct {
-	Bitnuke struct {
-		Port            int
-		TokenSize       int
-		LinkTokenSize   int
-		TokenDictionary string
-		TTL             time.Duration
-	}
-	Redis struct {
-		Host string
-		Port int
-	}
-}
-
-var (
-	config = Config{}
-)
-
 func main() {
-	err := gcfg.ReadFileInto(&config, "config.gcfg")
-	if err != nil {
-		fmt.Printf("Could not load config.gcfg, error: %s\n", err)
-		return
-	}
+	redishost := flag.String("redishost", "localhost", "redis server host/ip")
+	redisport := flag.String("redisport", "6379", "redis server port")
+	listenport := flag.String("port", "8808", "bitnuke listening port")
+	flag.Parse()
 
-	redisaddr := fmt.Sprint(config.Redis.Host, ":", config.Redis.Port)
-	bitport := fmt.Sprint(":", config.Bitnuke.Port)
-	println("bitnuke running on", config.Bitnuke.Port)
+	redisaddr := fmt.Sprint(*redishost, ":", *redisport)
+	bitport := fmt.Sprint(":", *listenport)
+	println("bitnuke running on", *listenport)
 	println("link to redis on", redisaddr)
 	// initialize redis connection
 	client := redis.NewClient(&redis.Options{
@@ -72,10 +53,7 @@ func main() {
 	// all handlers. lookin funcy casue i have to pass redis handler
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		upload(w, r, client, "tmp")
-	})
-	router.HandleFunc("/supload", func(w http.ResponseWriter, r *http.Request) {
-		upload(w, r, client, "persist")
+		upload(w, r, client)
 	})
 	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
 		linkcompressor(w, r, client)
@@ -114,7 +92,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client
 	}
 }
 
-func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state string) {
+func upload(w http.ResponseWriter, r *http.Request, client *redis.Client) {
 	// get file POST from index
 	//fmt.Println("method:", r.Method)
 	if r.Method == "GET" {
@@ -135,7 +113,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		defer file.Close()
 
 		// generate token and hash to save
-		token := tokenGen(config.Bitnuke.TokenSize, client)
+		token := randStr(8)
 		w.Header().Set("token", token)
 		fmt.Fprintf(w, "%s", token)
 
@@ -164,67 +142,50 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 
 		//println("uploading ", "file")
 		client.Set(hashstr, fileBase64Str, 0).Err()
-		if strings.EqualFold(state, "tmp") {
-			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
-			//fmt.Println("expire link generated")
-		}
+		client.Expire(hashstr, (12 * time.Hour)).Err()
 		os.Remove("tmpfile")
 	}
 }
 
 func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client) {
-	err := r.ParseForm()
-	if err != nil {
-		fmt.Println("error during form parse")
-	}
-	content := r.PostFormValue("link")
-	page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
-	fmt.Println(page)
-	content64Str := base64.StdEncoding.EncodeToString([]byte(page))
-	// generate token and hash it to store in db
-	token := tokenGen(config.Bitnuke.LinkTokenSize, client)
-	hash := sha3.Sum512([]byte(token))
-	hashstr := fmt.Sprintf("%x", hash)
+	if r.Method == "GET" {
+		crutime := time.Now().Unix()
+		h := md5.New()
+		io.WriteString(h, strconv.FormatInt(crutime, 10))
+		token := fmt.Sprintf("%x", h.Sum(nil))
 
-	// throw it in the db
-	client.Set(hashstr, content64Str, 0).Err()
-	client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
-	// return token to client
-	w.Header().Set("compressor", token)
-	fmt.Fprintf(w, "%s", token)
-}
+		t, _ := template.ParseFiles("upload.gtpl")
+		t.Execute(w, token)
+	} else {
+		r.ParseMultipartForm(32 << 20)
+		content := r.FormValue("file")
 
-func tokenGen(strSize int, client *redis.Client) string {
-	// generate new token
-	token := randStr(strSize)
-	// hash token
-	hash := sha3.Sum512([]byte(token))
-	hashstr := fmt.Sprintf("%x", hash)
-
-	_, err := client.Get(hashstr).Result()
-
-	for err != redis.Nil {
-		fmt.Println("DEBUG :: COLLISION")
-		token = randStr(strSize)
+		// parse content
+		// for now we return a html page, might end up doing a 301 redirect
+		//  see here: https://gist.github.com/hSATAC/5343225
+		page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
+		content64Str := base64.StdEncoding.EncodeToString([]byte(page))
+		// generate token and hash it to store in db
+		token := randStr(4)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
 
-		_, err = client.Get(hashstr).Result()
-		// do not ddos box if db is full
-		time.Sleep(time.Second * 1)
+		// throw it in the db
+		client.Set(hashstr, content64Str, 0).Err()
+		client.Expire(hashstr, (12 * time.Hour)).Err()
+		// return token to client
+		w.Header().Set("compressor", token)
+		fmt.Fprintf(w, "%s", token)
 	}
-	return token
 }
 
 func randStr(strSize int) string {
-	//dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	dictionary := config.Bitnuke.TokenDictionary
+	dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 	var bytes = make([]byte, strSize)
 	rand.Read(bytes)
 	for k, v := range bytes {
 		bytes[k] = dictionary[v%byte(len(dictionary))]
 	}
-
 	return string(bytes)
 }
