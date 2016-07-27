@@ -6,20 +6,18 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"github.com/gorilla/mux"
+	"golang.org/x/crypto/sha3"
+	"gopkg.in/gcfg.v1"
+	"gopkg.in/redis.v3"
 	"html/template"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/unixvoid/glogger"
-	"golang.org/x/crypto/sha3"
-	"gopkg.in/gcfg.v1"
-	"gopkg.in/redis.v3"
 )
 
 /*
@@ -47,9 +45,6 @@ type Config struct {
 		Host string
 		Port int
 	}
-	Server struct {
-		Loglevel string
-	}
 }
 
 var (
@@ -63,21 +58,10 @@ func main() {
 		return
 	}
 
-	// init logger
-	if config.Server.Loglevel == "debug" {
-		glogger.LogInit(os.Stdout, os.Stdout, os.Stdout, os.Stderr)
-	} else if config.Server.Loglevel == "cluster" {
-		glogger.LogInit(os.Stdout, os.Stdout, ioutil.Discard, os.Stderr)
-	} else if config.Server.Loglevel == "info" {
-		glogger.LogInit(os.Stdout, ioutil.Discard, ioutil.Discard, os.Stderr)
-	} else {
-		glogger.LogInit(ioutil.Discard, ioutil.Discard, ioutil.Discard, os.Stderr)
-	}
-
 	redisaddr := fmt.Sprint(config.Redis.Host, ":", config.Redis.Port)
 	bitport := fmt.Sprint(":", config.Bitnuke.Port)
-	glogger.Info.Println("bitnuke running on", config.Bitnuke.Port)
-	glogger.Info.Println("link to redis on", redisaddr)
+	println("bitnuke running on", config.Bitnuke.Port)
+	println("link to redis on", redisaddr)
 	// initialize redis connection
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisaddr,
@@ -99,7 +83,7 @@ func main() {
 	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
 		handlerdynamic(w, r, client)
 	}).Methods("GET")
-	glogger.Error.Println(http.ListenAndServe(bitport, router))
+	log.Fatal(http.ListenAndServe(bitport, router))
 }
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client) {
@@ -112,12 +96,12 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, client *redis.Client
 
 	val, err := client.Get(hashstr).Result()
 	if err != nil {
-		glogger.Debug.Println("data does not exist")
+		log.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
 	} else {
 		//log.Printf("data exists")
 		ip := strings.Split(r.RemoteAddr, ":")[0]
-		glogger.Debug.Printf("Responsing to %s :: from: %s", fdata, ip)
+		log.Printf("Responsing to %s :: from: %s", fdata, ip)
 
 		decodeVal, _ := base64.StdEncoding.DecodeString(val)
 
@@ -182,10 +166,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		if strings.EqualFold(state, "tmp") {
 			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
-			glogger.Debug.Println("expire link generated")
-		} else {
-			client.Persist(hashstr).Err()
-			glogger.Debug.Println("persistent link generated")
+			//fmt.Println("expire link generated")
 		}
 		os.Remove("tmpfile")
 	}
@@ -198,7 +179,7 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 	}
 	content := r.PostFormValue("link")
 	page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", content)
-	glogger.Debug.Println(page)
+	fmt.Println(page)
 	content64Str := base64.StdEncoding.EncodeToString([]byte(page))
 	// generate token and hash it to store in db
 	token := tokenGen(config.Bitnuke.LinkTokenSize, client)
@@ -207,7 +188,7 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 
 	// throw it in the db
 	client.Set(hashstr, content64Str, 0).Err()
-	//client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
+	client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 	// return token to client
 	w.Header().Set("compressor", token)
 	fmt.Fprintf(w, "%s", token)
@@ -216,17 +197,14 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, client *redis.Client
 func tokenGen(strSize int, client *redis.Client) string {
 	// generate new token
 	token := randStr(strSize)
-	println(token)
 	// hash token
 	hash := sha3.Sum512([]byte(token))
 	hashstr := fmt.Sprintf("%x", hash)
-	println(hashstr)
 
-	test, err := client.Get(hashstr).Result()
-	println(test)
+	_, err := client.Get(hashstr).Result()
 
 	for err != redis.Nil {
-		glogger.Error.Println("DEBUG :: COLLISION")
+		fmt.Println("DEBUG :: COLLISION")
 		token = randStr(strSize)
 		hash := sha3.Sum512([]byte(token))
 		hashstr := fmt.Sprintf("%x", hash)
