@@ -1,4 +1,5 @@
 [bitnuke]
+	loglevel		= "debug"
 	port			= 8808
 	tokensize		= 6
 	sectokensize		= 25
@@ -7,5 +8,5 @@
 	tokendictionary 	= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	secdictionary		= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 [redis]
-	host			= "localhost"
-	port			= 6379
+	host			= "localhost:6379"
+	password		= ""
