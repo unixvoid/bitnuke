@@ -24,7 +24,7 @@ stage: bitnuke.go
 
 stat:
 	mkdir -p bin/
-	$(CGOR) $(GOC) $(GOFLAGS) -o bin/binuke bitnuke/*.go
+	$(CGOR) $(GOC) $(GOFLAGS) -o bin/bitnuke bitnuke/*.go
 
 install: stat
 	cp bitnuke /usr/bin
