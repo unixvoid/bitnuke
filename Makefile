@@ -32,7 +32,7 @@ run:
 docker:
 	$(MAKE) stat
 	mkdir -p stage.tmp/
-	cp bin/bitnuke stage.tmp/
+	cp bin/bitnuke* stage.tmp/
 	cp deps/Dockerfile stage.tmp/
 	cp deps/run.sh stage.tmp/
 	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
@@ -41,7 +41,7 @@ docker:
 
 stat:
 	mkdir -p bin/
-	$(CGOR) $(GOC) $(GOFLAGS) -o bin/bitnuke bitnuke/*.go
+	$(CGOR) $(GOC) $(GOFLAGS) -o bin/bitnuke-$(GIT_HASH)-linux-amd64 bitnuke/*.go
 
 install: stat
 	cp bitnuke /usr/bin
