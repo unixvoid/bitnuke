@@ -1,0 +1,24 @@
+language: go
+
+go:
+  - 1.5.4
+  - 1.6
+
+services:
+  - docker
+
+install:
+  - make dependencies
+
+script:
+  - make stat
+  - make test
+
+after_success:
+  - make clean
+  - make docker
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - docker tag unixvoid/bitnuke unixvoid/bitnuke:develop
+  - docker push unixvoid/bitnuke:develop
+  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form path=bitnuke/ https://cryo.unixvoid.com/upload
+  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form filename=bitnuke-latest-linux-amd64 --form path=bitnuke/ https://cryo.unixvoid.com/upload

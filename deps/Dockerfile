@@ -1,5 +1,6 @@
 FROM alpine
 
+ENV DIFF=<DIFF>
 RUN apk update && apk add redis
 RUN rm -rf /var/cache/apk/*
 
