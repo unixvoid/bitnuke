@@ -12,7 +12,6 @@ install:
 
 script:
   - make stat
-  - make test
 
 after_success:
   - make clean
