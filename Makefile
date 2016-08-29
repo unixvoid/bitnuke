@@ -13,6 +13,7 @@ dependencies:
 	go get github.com/unixvoid/glogger
 	go get gopkg.in/gcfg.v1
 	go get gopkg.in/redis.v3
+	go get golang.org/x/crypto/sha3
 
 daemon:
 	bin/bitnuke &
