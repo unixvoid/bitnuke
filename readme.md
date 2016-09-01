@@ -2,6 +2,7 @@ bitnuke
 --------
 
 bitnuke is a fully volitile data storage solution currently running at https://bitnuke.io  
+Please note, this repo is soley the API backend.  To bring up the full stack please visit [bitnuke-compose](https://github.com/unixvoid/bitnuke-compose).
 This repo is strictly the API that supports the following REST calls:  
 
 ```
