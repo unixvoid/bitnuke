@@ -4,7 +4,9 @@ GOFLAGS=-a -ldflags '-s'
 CGOR=CGO_ENABLED=0
 DOCKER_PREFIX=sudo
 IMAGE_NAME=unixvoid/bitnuke
+NGINX_IMAGE_NAME=unixvoid/bitnuke:nginx
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
+HOST_IP=192.168.1.9
 
 all: bitnuke
 
@@ -38,6 +40,23 @@ docker:
 	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
 	cd stage.tmp && \
 		$(DOCKER_PREFIX) docker build -t $(IMAGE_NAME) .
+
+nginx:
+	mkdir -p stage.tmp/
+	cp deps/Dockerfile.nginx stage.tmp/Dockerfile
+	cp -R deps/conf stage.tmp/
+	cp -R deps/data stage.tmp/
+	sed -i "s/<SERVER_IP>/$(HOST_IP)/g" stage.tmp/conf/nginx.conf
+	cd stage.tmp && \
+		$(DOCKER_PREFIX) docker build -t $(NGINX_IMAGE_NAME) .
+
+runnginx:
+	$(DOCKER_PREFIX) docker run \
+		-d \
+		-p 9009:9009 \
+		--name bitnuke-nginx \
+		$(NGINX_IMAGE_NAME)
+	$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
 
 stat:
 	mkdir -p bin/
