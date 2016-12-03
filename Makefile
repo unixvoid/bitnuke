@@ -6,7 +6,7 @@ DOCKER_PREFIX=sudo
 IMAGE_NAME=unixvoid/bitnuke
 NGINX_IMAGE_NAME=unixvoid/bitnuke:nginx
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
-HOST_IP=192.168.1.9
+HOST_IP=172.17.0.1
 
 all: bitnuke
 
