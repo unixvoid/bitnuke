@@ -29,13 +29,13 @@ body {
 }
 
 .droppy {
-  /*background: rgba(0, 0, 0, .9);
-  background-color: transparent;*/
+  background: rgba(0, 0, 0, .16);
+  /*background-color: transparent;*/
   border: 2px dashed rgba(128, 128, 128, 0.8) !important;
 }
 
 .dropzone:hover {
-  background: rgba(0, 0, 0, .2) !important;
+  background: rgba(0, 0, 0, .3) !important;
   /*background: #000000 !important;*/
   transition: all 0.6s ease !important;
   opacity: 3 !important;
