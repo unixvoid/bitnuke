@@ -52,11 +52,12 @@ nginx:
 
 runnginx:
 	$(DOCKER_PREFIX) docker run \
-		-d \
+		-it \
+		--rm \
 		-p 9009:9009 \
 		--name bitnuke-nginx \
 		$(NGINX_IMAGE_NAME)
-	$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
+	#$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
 
 stat:
 	mkdir -p bin/

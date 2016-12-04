@@ -180,7 +180,7 @@
   border-radius: 5px;
   min-height: 150px;
   border: 2px dashed rgba(0, 0, 0, 0.3);
-  background: #D3D3D3;
+  /*background: #D3D3D3;*/
   transition: all 0.6s ease;
   padding: 20px 20px; }
   .dropzone:hover {
