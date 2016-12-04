@@ -3,7 +3,7 @@ FROM alpine
 ENV DIFF=<DIFF>
 
 RUN apk update && apk add redis
-RUN mkdir -p /cryo/log
+RUN mkdir -p /cryo/log /redisbackup/
 RUN rm -rf /var/cache/apk/*
 
 COPY conf /cryo/conf

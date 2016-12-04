@@ -4,7 +4,7 @@ GOFLAGS=-a -ldflags '-s'
 CGOR=CGO_ENABLED=0
 DOCKER_PREFIX=sudo
 IMAGE_NAME=unixvoid/bitnuke
-FULL_IMAGE_NAME=unixvoid/bitnuke
+FULL_IMAGE_NAME=unixvoid/bitnuke:winterui
 NGINX_IMAGE_NAME=unixvoid/bitnuke:nginx
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
 HOST_IP=172.17.0.1
