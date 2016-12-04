@@ -26,14 +26,14 @@ body {
 }
 
 .dropmsg {
-  color: rgba(178, 178, 178, 0.8);
+  color: rgba(128, 128, 128, 0.8);
   /*color: rgba(0, 0, 0, 0.8);*/
 }
 
 .droppy {
   /*background: rgba(0, 0, 0, .9);
   background-color: transparent;*/
-  border: 2px dashed rgba(178, 178, 178, 0.8) !important;
+  border: 2px dashed rgba(128, 128, 128, 0.8) !important;
 }
 
 .dropzone:hover {
@@ -76,7 +76,7 @@ p a:hover {
 }
 
 .footer {
-  color: #b2b2b2;
+  color: gray;
   font-size: 12px;
 	border-top: 1px solid rgba(63, 63, 63, 0.19);
   position: absolute;
@@ -93,7 +93,7 @@ p a:hover {
 	transition: color .15s;
 	text-decoration: none;
   font-weight: normal;
-  color: #b2b2b2;
+  color: gray;
 }
 
 .leftfoot {
