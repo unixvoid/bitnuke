@@ -29,7 +29,7 @@ body {
   /*color: rgba(0, 0, 0, 0.8);*/
 }
 
-.droppy {
+#droppy {
   background: rgba(0, 0, 0, .16);
   /*background-color: transparent;*/
   border: 2px dashed rgba(128, 128, 128, 0.8) !important;
@@ -44,27 +44,8 @@ body {
   border-radius: 5px;
   min-height: 40px;
   color: gray;
-  /*border: 2px dashed rgba(0, 0, 0, 0.3);*/
-  /*background: #D3D3D3;*/
-  /*transition: all 0.6s ease;*/
   padding: 7px 10px;
 }
-
-.mlink {
-  transition: color .15s;
-  text-decoration: none;
-  font-weight: normal;
-  color: gray;
-  padding-right: 30px;
-  padding-left: 30px;
-}
-
-/*.mlink:hover {
-  background: rgba(0, 0, 0, .3) !important;
-  transition: all 0.6s ease !important;
-  opacity: 3 !important;
-  cursor: pointer !important;
-}*/
 
 .dropzone:hover {
   background: rgba(0, 0, 0, .3) !important;
@@ -85,26 +66,6 @@ h1 span {
   padding-left: 4px;
 }
 
-/*p {
-  margin-top: 200px;
-}
-p a {
-  text-transform: uppercase;
-  text-decoration: none;
-  display: inline-block;
-  color: #fff;
-  padding: 5px 10px;
-  margin: 0 5px;
-  background-color: #b83729;
-  -moz-transition: all 0.2s ease-in;
-  -o-transition: all 0.2s ease-in;
-  -webkit-transition: all 0.2s ease-in;
-  transition: all 0.2s ease-in;
-}
-p a:hover {
-  background-color: #ab3326;
-}*/
-
 .footer {
   color: gray;
   font-size: 12px;
@@ -120,11 +81,16 @@ p a:hover {
 }
 
 .flink {
-  transition: color .15s;
   text-decoration: none;
   font-weight: normal;
   color: gray;
   padding-right: 8px;
+}
+
+.flink:hover {
+  transition: all 0.6s ease;
+  /*transition: color .15s;*/
+  color: #666666;
 }
 
 .leftfoot {
@@ -203,7 +169,7 @@ p a:hover {
 }
 
 #writezone a {
-  color: #3f3f3f;
+  color: gray;
   text-decoration: none;
   font-weight: normal;
 }
