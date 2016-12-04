@@ -15,7 +15,7 @@ script:
 
 after_success:
   - make clean
-  - make docker
+  - make fulldocker
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker tag unixvoid/bitnuke unixvoid/bitnuke:$TRAVIS_BRANCH
   - docker push unixvoid/bitnuke:$TRAVIS_BRANCH
