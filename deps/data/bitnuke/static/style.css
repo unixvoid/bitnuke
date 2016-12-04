@@ -34,6 +34,39 @@ body {
   border: 2px dashed rgba(128, 128, 128, 0.8) !important;
 }
 
+.nav {
+  background: rgba(0, 0, 0, .16);
+  /*background-color: transparent;*/
+  border: 2px solid rgba(128, 128, 128, 0.8) !important;
+
+  height: 40px;
+  width: 700px;
+  border-radius: 5px;
+  min-height: 40px;
+  color: gray;
+  /*border: 2px dashed rgba(0, 0, 0, 0.3);*/
+  /*background: #D3D3D3;*/
+  /*transition: all 0.6s ease;*/
+  padding: 10px 10px;
+}
+
+.mlink {
+  transition: color .15s;
+  text-decoration: none;
+  font-weight: normal;
+  color: gray;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+.mlink:hover {
+  background: rgba(0, 0, 0, .3) !important;
+  /*background: #000000 !important;*/
+  transition: all 0.6s ease !important;
+  opacity: 3 !important;
+  cursor: pointer !important;
+}
+
 .dropzone:hover {
   background: rgba(0, 0, 0, .3) !important;
   /*background: #000000 !important;*/
@@ -53,7 +86,7 @@ h1 span {
   padding-left: 4px;
 }
 
-p {
+/*p {
   margin-top: 200px;
 }
 p a {
@@ -71,7 +104,7 @@ p a {
 }
 p a:hover {
   background-color: #ab3326;
-}
+}*/
 
 .footer {
   color: gray;
@@ -88,8 +121,8 @@ p a:hover {
 }
 
 .flink {
-	transition: color .15s;
-	text-decoration: none;
+  transition: color .15s;
+  text-decoration: none;
   font-weight: normal;
   color: gray;
   padding-right: 8px;
