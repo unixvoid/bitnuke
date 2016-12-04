@@ -243,22 +243,24 @@ h1 span {
 }
 
 .linkstyle input[type="text"] {
-	padding: 10px;
-	width: 325px;
-	border: 2px solid rgba(0, 0, 0, 0.3);
-	border-radius: 5px;
-	color: #3f3f3f;
-	background: #D3D3D3;
-	transition: all 0.6s ease;
+  background: rgba(0, 0, 0, .16);
+  padding: 10px;
+  width: 325px;
+  border: 2px solid rgba(128, 128, 128, 0.8);
+  border-radius: 5px;
+  color: gray;
+  transition: all 0.6s ease;
 }
+
 .linkstyle input[type="text"]:hover {
-	background: #BDBDBD;
-	transition: all 0.6s ease;
-	opacity: 3;
-	cursor: pointer;
+  background: rgba(0, 0, 0, .3) !important;
+  transition: all 0.6s ease;
+  opacity: 3;
+  cursor: pointer;
 }
+
 .linkstyle input[type="text"]:focus,
 .linkstyle input[type="text"].focus {
-	background: #BDBDBD;
-	opacity: 3;
+  background: rgba(0, 0, 0, .3) !important;
+  opacity: 3;
 }
