@@ -22,8 +22,8 @@
   $('#link').submit(function () {
     $.post('/compress', $('#link').serialize(), function (data) {
       $('#writezone').append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
-	  console.log($('#link').serialize());
-      console.log(data);
+	  //console.log($('#link').serialize());
+      //console.log(data);
     });
     return false;
   });
