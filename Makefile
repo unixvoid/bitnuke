@@ -41,6 +41,33 @@ docker:
 	cd stage.tmp && \
 		$(DOCKER_PREFIX) docker build -t $(IMAGE_NAME) .
 
+fulldocker:
+	$(MAKE) stat
+	mkdir -p stage.tmp/
+	cp bin/bitnuke* stage.tmp/bitnuke
+	cp bitnuke/config.gcfg stage.tmp/
+	cp deps/Dockerfile.full stage.tmp/Dockerfile
+	cp -R deps/conf stage.tmp/
+	cp -R deps/data stage.tmp/
+	cp deps/full.run.sh stage.tmp/run.sh
+	mv stage.tmp/conf/daemon.nginx.conf stage.tmp/conf/nginx.conf
+	wget -O stage.tmp/nginx https://cryo.unixvoid.com/bin/nginx/nginx-latest-linux-amd64
+	chmod +x stage.tmp/nginx
+	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
+	cd stage.tmp && \
+		$(DOCKER_PREFIX) docker build -t bitnuke:full .
+		#$(DOCKER_PREFIX) docker build -t $(IMAGE_NAME) .
+
+runfull:
+	$(DOCKER_PREFIX) docker run \
+		-it \
+		--rm \
+		-p 9009:9009 \
+		--name bitnuke-nginx \
+		bitnuke:full
+		#$(NGINX_IMAGE_NAME)
+	#$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
+
 nginx:
 	mkdir -p stage.tmp/
 	cp deps/Dockerfile.nginx stage.tmp/Dockerfile
