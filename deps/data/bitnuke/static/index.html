@@ -6,7 +6,15 @@
     <link rel="shortcut icon" type="image/png" href="static/favicon.png">
     <link rel="stylesheet" href="static/style.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <!-- load snowstorm -->
     <script type="text/javascript" src="static/snowstorm-min.js"></script>
+    <!-- configure snowstorm -->
+    <script>
+      snowStorm.followMouse = false;
+      snowStorm.vMaxX = 0;
+      snowStorm.vMaxY = 3;
+      snowStorm.freezeOnBlur = false;
+    </script>
   </head>
 
   <div class=tint>
@@ -52,7 +60,8 @@
           	<a class=flink href="https://github.com/unixvoid/bitnuke">//v0.10.3</a>
                 </div>
                 <div class=rightfoot>
-                  <a class=flink href="/persist">//persistent_uploads</a>
+		<input class=blink type="button" value="//toggle_snow" onclick="snowStorm.toggleSnow();"/>
+                <a class=flink href="/persist">//persistent_uploads</a>
           	<a class=flink href="/link">//link_shortener</a>
           	<a class=flink class=button href="#about">//about</a>
                 </div>

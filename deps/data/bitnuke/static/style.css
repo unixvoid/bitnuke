@@ -81,6 +81,23 @@ h1 span {
   color: #666666;
 }
 
+.blink {
+  text-decoration: none;
+  font-weight: normal;
+  color: gray;
+  padding-right: 8px;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.blink:hover {
+  transition: all 0.6s ease;
+  color: #666666;
+}
+
 .leftfoot {
 	float: left;
 	padding-left: 2%;
