@@ -1,13 +1,8 @@
-.PHONY: docker
 GOC=go build
 GOFLAGS=-a -ldflags '-s'
 CGOR=CGO_ENABLED=0
-DOCKER_PREFIX=sudo
-IMAGE_NAME=unixvoid/bitnuke
-FULL_IMAGE_NAME=unixvoid/bitnuke:winterui
-NGINX_IMAGE_NAME=unixvoid/bitnuke:nginx
+OS_PERMS=sudo
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
-HOST_IP=172.17.0.1
 
 all: bitnuke
 
@@ -32,58 +27,28 @@ run:
 		token_generator.go \
 		upload.go
 
-docker:
-	$(MAKE) stat
-	mkdir -p stage.tmp/
-	cp bin/bitnuke* stage.tmp/
-	cp deps/Dockerfile stage.tmp/
-	cp deps/run.sh stage.tmp/
-	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
-	cd stage.tmp && \
-		$(DOCKER_PREFIX) docker build -t $(IMAGE_NAME) .
+prep_aci: stat
+	mkdir -p stage.tmp/bitnuke-layout/rootfs/
+	cp bin/bitnuke* stage.tmp/bitnuke-layout/rootfs/bitnuke
+	cp bitnuke/config.gcfg stage.tmp/bitnuke-layout/rootfs/
+	cp deps/manifest.json stage.tmp/bitnuke-layout/manifest
 
-fulldocker:
-	$(MAKE) stat
-	mkdir -p stage.tmp/
-	cp bin/bitnuke* stage.tmp/bitnuke
-	cp bitnuke/config.gcfg stage.tmp/
-	cp deps/Dockerfile.full stage.tmp/Dockerfile
-	cp -R deps/conf stage.tmp/
-	cp -R deps/data stage.tmp/
-	cp deps/full.run.sh stage.tmp/run.sh
-	mv stage.tmp/conf/daemon.nginx.conf stage.tmp/conf/nginx.conf
-	wget -O stage.tmp/nginx https://cryo.unixvoid.com/bin/nginx/nginx-latest-linux-amd64
-	chmod +x stage.tmp/nginx
-	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
-	cd stage.tmp && \
-		$(DOCKER_PREFIX) docker build -t $(FULL_IMAGE_NAME) .
+build_aci: prep_aci
+	# build image
+	cd stage.tmp/ && \
+		actool build bitnuke-layout bitnuke-api.aci && \
+		mv bitnuke-api.aci ../
+	@echo "bitnuke-api.aci built"
 
-runfull:
-	$(DOCKER_PREFIX) docker run \
-		-it \
-		--rm \
-		-p 9009:9009 \
-		--name bitnuke-nginx \
-		$(FULL_IMAGE_NAME)
-	#$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
-
-nginx:
-	mkdir -p stage.tmp/
-	cp deps/Dockerfile.nginx stage.tmp/Dockerfile
-	cp -R deps/conf stage.tmp/
-	cp -R deps/data stage.tmp/
-	sed -i "s/<SERVER_IP>/$(HOST_IP)/g" stage.tmp/conf/nginx.conf
-	cd stage.tmp && \
-		$(DOCKER_PREFIX) docker build -t $(NGINX_IMAGE_NAME) .
-
-runnginx:
-	$(DOCKER_PREFIX) docker run \
-		-it \
-		--rm \
-		-p 9009:9009 \
-		--name bitnuke-nginx \
-		$(NGINX_IMAGE_NAME)
-	#$(DOCKER_PREFIX) docker logs -f bitnuke-nginx
+build_travis_aci: prep_aci
+	wget https://github.com/appc/spec/releases/download/v0.8.7/appc-v0.8.7.tar.gz
+	tar -zxf appc-v0.8.7.tar.gz
+	# build image
+	cd stage.tmp/ && \
+		../appc-v0.8.7/actool build bitnuke-layout bitnuke-api.aci && \
+		mv bitnuke-api.aci ../
+	rm -rf appc-v0.8.7*
+	@echo "bitnuke-api.aci built"
 
 stat:
 	mkdir -p bin/
@@ -95,3 +60,4 @@ install: stat
 clean:
 	rm -rf bin/
 	rm -rf stage.tmp/
+	rm -f bitnuke-api.aci
