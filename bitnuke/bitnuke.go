@@ -24,6 +24,7 @@ type Config struct {
 		TTL             time.Duration
 		TokenDictionary string
 		SecDictionary   string
+		Delay           int
 	}
 	Redis struct {
 		Host     string
@@ -40,18 +41,19 @@ func main() {
 	readConf()
 	initLogger()
 
-	// init redis connection
-	// small sleep to allow redis to load data into memory
-	// this is considered a hack for now. Redis will fail the ping/pong if
-	// the database is not ready.  It is safe to use redis before it is ready
-	// as it will store the new data in memory until it can access the databse
-	time.Sleep(time.Second * 1)
-	redisClient, redisErr := initRedisConnection()
-	if redisErr != nil {
-		glogger.Error.Println("redis connection cannot be made, exiting.")
-		panic(redisErr)
+	// sleep if required before redis connection is made
+	if config.Bitnuke.Delay != 0 {
+		glogger.Debug.Printf("sleeping %d seconds before startup\n", config.Bitnuke.Delay)
+		time.Sleep(time.Duration(config.Bitnuke.Delay) * time.Second)
+	}
+
+	// start redis connection
+	redisClient, err := initRedisConnection()
+	if err != nil {
+		glogger.Error.Println("redis connection cannot be made, exiting")
+		os.Exit(0)
 	} else {
-		glogger.Debug.Println("connection to redis succeeded.")
+		glogger.Info.Println("connection to redis succeeded.")
 	}
 
 	// all handlers. lookin funcy casue i have to pass redis handler

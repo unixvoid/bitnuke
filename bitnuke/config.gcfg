@@ -7,6 +7,8 @@
 	ttl			= 12
 	tokendictionary 	= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	secdictionary		= "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	delay			= 1
+
 [redis]
 	host			= "localhost:6379"
 	password		= ""
