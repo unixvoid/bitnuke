@@ -26,5 +26,5 @@ after_success:
   - cp deps/sign.sh . && chmod +x sign.sh
   - ./sign.sh $GPG_SEC
   # upload bitnuke aci image
-  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-latest-linux-amd64.aci --form path=rkt/bitnuke/ https://cryo.unixvoid.com/upload
-  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-latest-linux-amd64.aci.asc --form path=rkt/bitnuke/ https://cryo.unixvoid.com/upload
+  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-api-latest-linux-amd64.aci --form path=rkt/bitnuke/ https://cryo.unixvoid.com/upload
+  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-api-latest-linux-amd64.aci.asc --form path=rkt/bitnuke/ https://cryo.unixvoid.com/upload
