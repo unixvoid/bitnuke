@@ -1,23 +1,28 @@
 language: go
+sudo: required
 
 go:
-  - 1.5.4
   - 1.6
+  - 1.7
 
 services:
   - docker
 
 install:
+  # pull required dependencies
   - make dependencies
 
 script:
+  # statically compile
   - make stat
 
 after_success:
+  # clean, build, push to docker
   - make clean
   - make fulldocker
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - docker tag unixvoid/bitnuke unixvoid/bitnuke:$TRAVIS_BRANCH
-  - docker push unixvoid/bitnuke:$TRAVIS_BRANCH
+  - docker tag unixvoid/bitnuke unixvoid/bitnuke:winterui
+  - docker push unixvoid/bitnuke:winterui
+  # push binaries to binder
   - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form path=bitnuke/ https://cryo.unixvoid.com/upload
   - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form filename=bitnuke-latest-linux-amd64 --form path=bitnuke/ https://cryo.unixvoid.com/upload
