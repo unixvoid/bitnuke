@@ -3,11 +3,11 @@ FROM alpine
 ENV DIFF=<DIFF>
 
 RUN apk update && apk add redis
-RUN mkdir -p /cryo/log /redisbackup/
+RUN mkdir -p /nginx/log /redisbackup/
 RUN rm -rf /var/cache/apk/*
 
-COPY conf /cryo/conf
-COPY data /cryo/data
+COPY conf /nginx/conf
+COPY data /nginx/data
 COPY bitnuke /bin/
 COPY config.gcfg /
 COPY nginx /bin/
