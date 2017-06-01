@@ -6,7 +6,7 @@ RUN apk update && apk add redis
 RUN mkdir -p /nginx/log /redisbackup/
 RUN rm -rf /var/cache/apk/*
 
-COPY conf /nginx/conf
+COPY conf /nginx
 COPY data /nginx/data
 COPY bitnuke /bin/
 COPY config.gcfg /
