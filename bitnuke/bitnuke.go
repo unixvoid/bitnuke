@@ -24,7 +24,9 @@ type Config struct {
 		TTL             time.Duration
 		TokenDictionary string
 		SecDictionary   string
+		BootstrapDelay  time.Duration
 	}
+
 	Redis struct {
 		Host     string
 		Password string
@@ -41,15 +43,19 @@ func main() {
 	initLogger()
 
 	// init redis connection
-	// small sleep to allow redis to load data into memory
-	// this is considered a hack for now. Redis will fail the ping/pong if
-	// the database is not ready.  It is safe to use redis before it is ready
-	// as it will store the new data in memory until it can access the databse
-	time.Sleep(time.Second * 1)
+	// allow the bootstrap delay time if needed
+	// this allows redis to start before the app connects
+	// valuable when deploying in a container
+
 	redisClient, redisErr := initRedisConnection()
 	if redisErr != nil {
-		glogger.Error.Println("redis connection cannot be made, exiting.")
-		panic(redisErr)
+		glogger.Debug.Println("redis connection cannot be made, trying again in 1 second")
+		time.Sleep(config.Bitnuke.BootstrapDelay)
+		redisClient, redisErr = initRedisConnection()
+		if redisErr != nil {
+			glogger.Error.Println("redis connection cannot be made, exiting.")
+			panic(redisErr)
+		}
 	} else {
 		glogger.Debug.Println("connection to redis succeeded.")
 	}
@@ -97,6 +103,7 @@ func initLogger() {
 		glogger.LogInit(ioutil.Discard, ioutil.Discard, ioutil.Discard, os.Stderr)
 	}
 }
+
 func initRedisConnection() (*redis.Client, error) {
 	// init redis connection
 	redisClient := redis.NewClient(&redis.Options{
