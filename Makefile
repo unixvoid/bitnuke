@@ -4,7 +4,7 @@ GOFLAGS=-a -ldflags '-s'
 CGOR=CGO_ENABLED=0
 DOCKER_PREFIX=sudo
 IMAGE_NAME=unixvoid/bitnuke
-FULL_IMAGE_NAME=unixvoid/bitnuke:winterui
+FULL_IMAGE_NAME=unixvoid/bitnuke:newui
 NGINX_IMAGE_NAME=unixvoid/bitnuke:nginx
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
 HOST_IP=172.17.0.1
@@ -52,7 +52,7 @@ fulldocker:
 	cp -R deps/data stage.tmp/
 	cp deps/full.run.sh stage.tmp/run.sh
 	mv stage.tmp/conf/daemon.nginx.conf stage.tmp/conf/nginx.conf
-	wget -O stage.tmp/nginx https://cryo.unixvoid.com/bin/nginx/nginx-latest-linux-amd64
+	wget -O stage.tmp/nginx https://cryo.unixvoid.com/bin/nginx/libressl/nginx-1.11.10-linux-amd64
 	chmod +x stage.tmp/nginx
 	sed -i "s/<DIFF>/$(GIT_HASH)/g" stage.tmp/Dockerfile
 	cd stage.tmp && \
