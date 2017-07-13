@@ -1,6 +1,6 @@
 FROM unixvoid/nginx:develop
 
-COPY conf /cryo/conf
-COPY data /cryo/data
+COPY conf /nginx/conf
+COPY data /nginx/data
 
-ENTRYPOINT ["/bin/nginx"]
+ENTRYPOINT ["/bin/nginx", "-c", "/nginx/conf/nginx.conf"]
