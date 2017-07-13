@@ -14,8 +14,8 @@ body {
 }
 
 .bg {
-  background: url(color.jpg);
-  background-color: #1A6785;
+  background: url(violet.jpg);
+  background-color: #130F1E;
   background-repeat: no-repeat;
 }
 
@@ -26,7 +26,7 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  background: rgba(0, 0, 0, 0.65);
+  background: linear-gradient( rgba(0,0,0,0.25), rgba(0,0,0,1) 90% );
 }
 
 .dropmsg {
