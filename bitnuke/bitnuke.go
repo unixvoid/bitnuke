@@ -49,8 +49,8 @@ func main() {
 
 	redisClient, redisErr := initRedisConnection()
 	if redisErr != nil {
-		glogger.Debug.Printf("redis connection cannot be made, trying again in %s second(s)\n", config.Bitnuke.BootstrapDelay)
-		time.Sleep(config.Bitnuke.BootstrapDelay)
+		glogger.Debug.Printf("redis connection cannot be made, trying again in %s second(s)\n", config.Bitnuke.BootstrapDelay*time.Second)
+		time.Sleep(config.Bitnuke.BootstrapDelay * time.Second)
 		redisClient, redisErr = initRedisConnection()
 		if redisErr != nil {
 			glogger.Error.Println("redis connection cannot be made, exiting.")
