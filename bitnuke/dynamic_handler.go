@@ -42,8 +42,10 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
-		finalFname := fmt.Sprintf("attachment; filename=%s", filename)
-		w.Header().Set("Content-Disposition", finalFname)
+		if filename != "bitnuke:link" {
+			finalFname := fmt.Sprintf("attachment; filename=%s", filename)
+			w.Header().Set("Content-Disposition", finalFname)
+		}
 		http.ServeFile(w, r, "tmpfile")
 		os.Remove("tmpfile")
 	}
