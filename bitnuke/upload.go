@@ -29,10 +29,18 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		t.Execute(w, token)
 	} else {
 		r.ParseMultipartForm(32 << 20)
-		file, _, err := r.FormFile("file")
+
+		// set default filename
+		filename := "unnamed_file"
+
+		file, multipartFileHeader, err := r.FormFile("file")
 		if err != nil {
 			glogger.Error.Println(err)
 			return
+		} else {
+			// overwrite default filename with parsed filename
+			rawFilename := fmt.Sprintf("%v", multipartFileHeader.Filename)
+			filename = rawFilename
 		}
 		defer file.Close()
 
@@ -65,10 +73,12 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		fileBase64Str := base64.StdEncoding.EncodeToString(buf)
 
 		client.Set(hashstr, fileBase64Str, 0).Err()
+		client.Set(fmt.Sprintf("fname:%s", hashstr), filename, 0).Err()
 		if strings.EqualFold(state, "tmp") {
 			// expire if coming from /supload
 			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 			client.Expire(fmt.Sprintf("sec:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
+			client.Expire(fmt.Sprintf("filename:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
 			glogger.Debug.Println("expire link generated")
 		}
 		os.Remove("tmpfile")

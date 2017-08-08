@@ -23,12 +23,17 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	hashstr := fmt.Sprintf("%x", hash)
 
 	val, err := redisClient.Get(hashstr).Result()
+	filename, err := redisClient.Get(fmt.Sprintf("fname:%s", hashstr)).Result()
 	if err != nil {
 		glogger.Debug.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
 	} else {
 		glogger.Debug.Printf("data exists")
 		ip := strings.Split(r.RemoteAddr, ":")[0]
+		if ip == "[" {
+			// set client as localhost if it comes from localhost
+			ip = "localhost"
+		}
 		glogger.Debug.Printf("Responsing to %s :: from: %s", fdata, ip)
 
 		decodeVal, _ := base64.StdEncoding.DecodeString(val)
@@ -37,6 +42,10 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
+		if filename != "bitnuke:link" {
+			finalFname := fmt.Sprintf("attachment; filename=%s", filename)
+			w.Header().Set("Content-Disposition", finalFname)
+		}
 		http.ServeFile(w, r, "tmpfile")
 		os.Remove("tmpfile")
 	}
