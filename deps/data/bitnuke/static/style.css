@@ -7,10 +7,41 @@
 }
 
 body {
-  font-family: "Courier New", Courier, monospace;
+  /*font-family: "Courier New", Courier, monospace;*/
+  font-family: 'Open Sans', sans-serif;
   color: #3f3f3f;
   padding-top: 3%;
-  background-color: #d3d3d3;
+}
+
+.bg {
+  background-color: #5056b0;
+  background-repeat: no-repeat;
+}
+
+.tint {
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: linear-gradient( rgba(0,0,0,0.15), rgba(0,0,0,.3) 80% );
+}
+
+.dropmsg {
+  color: rgba(128, 128, 128, 0.8);
+}
+
+#droppy {
+  background: rgba(0, 0, 0, .16);
+  border: 2px dashed rgba(128, 128, 128, 0.8) !important;
+}
+
+.dropzone:hover {
+  background: rgba(0, 0, 0, .3) !important;
+  transition: all 0.6s ease !important;
+  opacity: 3 !important;
+  cursor: pointer !important;
 }
 
 h1 {
@@ -24,27 +55,8 @@ h1 span {
   padding-left: 4px;
 }
 
-p {
-  margin-top: 200px;
-}
-p a {
-  text-transform: uppercase;
-  text-decoration: none;
-  display: inline-block;
-  color: #fff;
-  padding: 5px 10px;
-  margin: 0 5px;
-  background-color: #b83729;
-  -moz-transition: all 0.2s ease-in;
-  -o-transition: all 0.2s ease-in;
-  -webkit-transition: all 0.2s ease-in;
-  transition: all 0.2s ease-in;
-}
-p a:hover {
-  background-color: #ab3326;
-}
-
 .footer {
+  color: gray;
   font-size: 12px;
 	border-top: 1px solid rgba(63, 63, 63, 0.19);
   position: absolute;
@@ -52,8 +64,37 @@ p a:hover {
   bottom: 0;
   left: 0;
   padding: 1rem;
-  background-color: #bfbfbf;
+  background-color: rgba(0, 0, 0, .2) !important;
   text-align: center;
+}
+
+.flink {
+  text-decoration: none;
+  font-weight: normal;
+  color: gray;
+  padding-right: 8px;
+}
+
+.flink:hover {
+  transition: all 0.6s ease;
+  color: #666666;
+}
+
+.blink {
+  text-decoration: none;
+  font-weight: normal;
+  color: gray;
+  padding-right: 8px;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.blink:hover {
+  transition: all 0.6s ease;
+  color: #666666;
 }
 
 .leftfoot {
@@ -64,13 +105,6 @@ p a:hover {
 .rightfoot {
 	float: right;
 	padding-right: 2%;
-}
-
-.flink {
-	transition: color .15s;
-	text-decoration: none;
-  font-weight: normal;
-  color: #1d1d1d;
 }
 
 .button {
@@ -139,7 +173,7 @@ p a:hover {
 }
 
 #writezone a {
-  color: #3f3f3f;
+  color: gray;
   text-decoration: none;
   font-weight: normal;
 }
@@ -213,22 +247,24 @@ p a:hover {
 }
 
 .linkstyle input[type="text"] {
-	padding: 10px;
-	width: 325px;
-	border: 2px solid rgba(0, 0, 0, 0.3);
-	border-radius: 5px;
-	color: #3f3f3f;
-	background: #D3D3D3;
-	transition: all 0.6s ease;
+  background: rgba(0, 0, 0, .16);
+  padding: 10px;
+  width: 325px;
+  border: 2px solid rgba(128, 128, 128, 0.8);
+  border-radius: 5px;
+  color: gray;
+  transition: all 0.6s ease;
 }
+
 .linkstyle input[type="text"]:hover {
-	background: #BDBDBD;
-	transition: all 0.6s ease;
-	opacity: 3;
-	cursor: pointer;
+  background: rgba(0, 0, 0, .3) !important;
+  transition: all 0.6s ease;
+  opacity: 3;
+  cursor: pointer;
 }
+
 .linkstyle input[type="text"]:focus,
 .linkstyle input[type="text"].focus {
-	background: #BDBDBD;
-	opacity: 3;
+  background: rgba(0, 0, 0, .3) !important;
+  opacity: 3;
 }

@@ -5,61 +5,67 @@
     <title>bitnuke</title>
     <link rel="shortcut icon" type="image/png" href="static/favicon.png">
     <link rel="stylesheet" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
   </head>
 
-  <body>
-    <script src="static/dropzone.js"></script>
-    <link rel="stylesheet" href="static/dropzone.css">
+  <div class=tint>
+    <body class=bg>
+      <script src="static/dropzone.js"></script>
+      <link rel="stylesheet" href="static/dropzone.css">
 
-    <center><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></center>
+      <center><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></center>
 
-    <center>
-    <div id="dropzone">
-      <form id="droppy" class="dropzone" action="/upload">
-        <div class="dz-message">
-          </br>Drop or click to upload
-        </div>
-      </form>
-    </div></br>
-    <div id=writezone></div>
-    </center>
+      <center>
+      <div id="dropzone">
+        <form id="droppy" class="dropzone" action="/upload">
+          <div class="dz-message dropmsg">
+            </br>Drop or click to upload
+          </div>
+        </form>
+      </div></br>
+      <div id=writezone></div>
+      </center>
 
-    <script>
-      Dropzone.options.droppy = {
-      method: "post",
-      maxFilesize: 512,
-      autoDiscover: false,
-        init: function() {
-          this.on("success", function(file, response) {
-            //console.log(response);
-            this.removeAllFiles();
-            //document.getElementById("writezone").innerHTML = (window.location.hostname + response).link(window.location.href + response);
-            document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
-          });
-        }
-      };
+      <script>
+        Dropzone.options.droppy = {
+        method: "post",
+        maxFilesize: 512,
+        autoDiscover: false,
+          init: function() {
+            this.on("success", function(file, response) {
+              //console.log(response);
+              this.removeAllFiles();
+              //document.getElementById("writezone").innerHTML = (window.location.hostname + response).link(window.location.href + response);
+              document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
+            });
+          }
+        };
 
-      console.log("bitnuke.io")
-      console.log("see you in 12 hours...")
-    </script>
-        <div class=footer>
-          <center>
-              <div class=leftfoot>
-                Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a> | <a class=flink href="https://github.com/unixvoid/bitnuke">v0.10.3</a>
+        console.log("bitnuke.io")
+        console.log("see you in 12 hours...")
+      </script>
+          <div class=footer>
+            <center>
+                <div class=leftfoot>
+                  Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a>
+          	<a class=flink href="https://github.com/unixvoid/bitnuke">//v0.10.4</a>
+                </div>
+                <div class=rightfoot>
+                  <a class=flink href="/persist">//persistent_uploads</a>
+          	  <a class=flink href="/link">//link_shortener</a>
+          	  <a class=flink class=button href="#about">//about</a>
+                </div>
+            </center>
+          </div>
+
+          <div id=about class=overlay>
+            <div class="popup">
+              <a class="close" href="#">x</a>
+              <div class=popupcontent>
+                bitnuke.io is an anonymous temporary file storage site. Your files are stored for 12 hours and then deleted permanently.
               </div>
-              <div class=rightfoot>
-                <a class=flink href="/persist">persistent_uploads</a> | <a class=flink href="/link">link_shortener</a> | <a class=flink class=button href="#about">about</a>
-              </div>
-          </center>
-        </div>
-
-        <div id=about class=overlay>
-          <div class="popup">
-            <a class="close" href="#">x</a>
-            <div class=popupcontent>
-              bitnuke.io is an anonymous temporary file storage site. Your files are stored for 24 hours and then deleted permanently.
             </div>
           </div>
-        </div>
-  </body>
+    </body>
+  </div>
 </html>

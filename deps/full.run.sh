@@ -7,6 +7,7 @@ echo "dir /redisbackup/" >> /redis.conf
 echo "save 30 1" >> /redis.conf
 
 redis-server /redis.conf
+nginx
 
 echo -e ""
 echo -e "\e[36m                    ________     \e[39m"
@@ -19,4 +20,4 @@ echo -e "\e[36m                   |________|    \e[39m"
 echo -e "\e[0m-------- \e[31mbitnuke\e[39m --------------\e[0m"
 echo -e "\e[0m  :: \e[31m$VER_NO\e[39m ::  \e[0m"
 
-/bitnuke $@
+bitnuke $@
