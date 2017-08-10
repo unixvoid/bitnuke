@@ -28,11 +28,20 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		glogger.Debug.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
 	} else {
+		// get the client's ip
 		ip := strings.Split(r.RemoteAddr, ":")[0]
+
+		// set client as localhost if it comes from localhost
 		if ip == "[" {
-			// set client as localhost if it comes from localhost
 			ip = "localhost"
 		}
+
+		// pull the client's real header if proxied. (if X-Forwarded-For is set)
+		realIp := r.Header.Get("X-Forwarded-For")
+		if realIp != "" {
+			ip = realIp
+		}
+
 		glogger.Debug.Printf("Responsing to %s :: from: %s", fdata, ip)
 
 		decodeVal, _ := base64.StdEncoding.DecodeString(val)
