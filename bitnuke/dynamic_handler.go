@@ -28,7 +28,6 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		glogger.Debug.Printf("data does not exist")
 		fmt.Fprintf(w, "token not found")
 	} else {
-		glogger.Debug.Printf("data exists")
 		ip := strings.Split(r.RemoteAddr, ":")[0]
 		if ip == "[" {
 			// set client as localhost if it comes from localhost
