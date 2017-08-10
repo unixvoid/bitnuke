@@ -21,7 +21,6 @@ after_success:
   - make clean
   - make fulldocker
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - docker tag unixvoid/bitnuke unixvoid/bitnuke
   - docker push unixvoid/bitnuke
   # push binaries to binder
   - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form path=bitnuke/ https://cryo.unixvoid.com/upload
