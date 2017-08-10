@@ -74,6 +74,10 @@ func main() {
 	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
 		linkcompressor(w, r, redisClient)
 	})
+	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		// client wants favicon, send back a does not exist
+		w.WriteHeader(http.StatusNotFound)
+	}).Methods("GET")
 	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
 		handlerdynamic(w, r, redisClient)
 	}).Methods("GET")
