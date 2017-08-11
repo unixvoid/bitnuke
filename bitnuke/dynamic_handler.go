@@ -22,18 +22,30 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	hash := sha3.Sum512([]byte(fdata))
 	hashstr := fmt.Sprintf("%x", hash)
 
+	// get the client's ip
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+
+	// set client as localhost if it comes from localhost
+	if ip == "[" {
+		ip = "localhost"
+	}
+
+	// pull the client's real header if proxied. (if X-Forwarded-For is set)
+	realIp := r.Header.Get("X-Forwarded-For")
+	if realIp != "" {
+		ip = realIp
+	}
+
+	// try and pull the data from redis
 	val, err := redisClient.Get(hashstr).Result()
 	filename, err := redisClient.Get(fmt.Sprintf("fname:%s", hashstr)).Result()
 	if err != nil {
-		glogger.Debug.Printf("data does not exist")
+		// handle the error if the token does not exist
+		glogger.Debug.Printf("data does not exist %s :: from: %s\n", fdata, ip)
 		fmt.Fprintf(w, "token not found")
 	} else {
-		ip := strings.Split(r.RemoteAddr, ":")[0]
-		if ip == "[" {
-			// set client as localhost if it comes from localhost
-			ip = "localhost"
-		}
-		glogger.Debug.Printf("Responsing to %s :: from: %s", fdata, ip)
+		// serve up the content to the client
+		glogger.Debug.Printf("Responsing to %s :: from: %s\n", fdata, ip)
 
 		decodeVal, _ := base64.StdEncoding.DecodeString(val)
 
@@ -41,6 +53,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
+		// dont add the filename header to links
 		if filename != "bitnuke:link" {
 			finalFname := fmt.Sprintf("INLINE; filename=%s", filename)
 			w.Header().Set("Content-Disposition", finalFname)
