@@ -75,7 +75,7 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		client.Set(hashstr, fileBase64Str, 0).Err()
 		client.Set(fmt.Sprintf("fname:%s", hashstr), filename, 0).Err()
 		if strings.EqualFold(state, "tmp") {
-			// expire if coming from /supload
+			// expire if not coming from /supload
 			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
 			client.Expire(fmt.Sprintf("sec:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
 			client.Expire(fmt.Sprintf("filename:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()

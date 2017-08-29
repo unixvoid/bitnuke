@@ -19,18 +19,18 @@ bitnuke:
 	$(GOC) bitnuke.go
 
 run:
-	cd bitnuke && go run \
-		bitnuke.go \
-		dynamic_handler.go \
-		link_compressor.go \
-		remove.go \
-		token_generator.go \
-		upload.go
+	go run \
+		bitnuke/bitnuke.go \
+		bitnuke/dynamic_handler.go \
+		bitnuke/link_compressor.go \
+		bitnuke/remove.go \
+		bitnuke/token_generator.go \
+		bitnuke/upload.go
 
 prep_aci: stat
 	mkdir -p stage.tmp/bitnuke-layout/rootfs/
 	cp bin/bitnuke* stage.tmp/bitnuke-layout/rootfs/bitnuke
-	cp bitnuke/config.gcfg stage.tmp/bitnuke-layout/rootfs/
+	cp config.gcfg stage.tmp/bitnuke-layout/rootfs/
 	cp deps/manifest.json stage.tmp/bitnuke-layout/manifest
 
 build_aci: prep_aci
