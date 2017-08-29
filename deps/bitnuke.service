@@ -1,0 +1,15 @@
+[Unit]
+Description=bitnuke-stack
+
+[Service]
+ExecStart=/usr/bin/rkt run \
+        --volume redis,kind=host,source=/bitnuke/redisdata \
+        --volume data,kind=host,source=/bitnuke/deps/data \
+        --volume conf,kind=host,source=/bitnuke/deps/conf \
+        --port=web-http:8080 \
+        unixvoid.com/redis --mount volume=redis,target=/redisbak \
+        unixvoid.com/nginx --mount volume=data,target=/nginx/data --mount volume=conf,target=/nginx/conf \
+        unixvoid.com/bitnuke-api
+
+[Install]
+WantedBy=multi-user.target

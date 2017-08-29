@@ -1,0 +1,39 @@
+{
+    "acKind": "ImageManifest",
+    "acVersion": "0.7.1",
+    "name": "unixvoid.com/bitnuke-api",
+    "labels": [
+        {
+            "name": "version",
+            "value": "latest"
+        },
+        {
+            "name": "arch",
+            "value": "amd64"
+        },
+        {
+            "name": "os",
+            "value": "linux"
+        }
+    ],
+    "app": {
+        "user": "root",
+        "group": "root",
+        "exec": [
+            "/bitnuke"
+        ],
+        "ports": [
+        {
+            "name": "api",
+            "protocol": "tcp",
+            "port": 8808
+        }
+        ]
+    },
+    "annotations": [
+        {
+        "name": "authors",
+        "value": "Matthew Faltys <mfaltys@gmail.com>"
+    }
+    ]
+}
