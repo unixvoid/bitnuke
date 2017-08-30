@@ -15,10 +15,22 @@ import (
 
 	"github.com/unixvoid/glogger"
 	"golang.org/x/crypto/sha3"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
-func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state string) {
+func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, state string) {
+	/*
+		    three things happen here. after the fileId, secretKey, and removalKey are generated
+				the following fields are made and uploaded to redis (AFTER encryption).
+
+				note that 4b7fb8096e6413f0d0ac246dfbc11a86<SNIP> is the sha3:512 hashed value of the
+				  key 'c4b08d47a0'.
+				note the contents of these redis keys are encrypted
+
+				4b7fb8096e6413f0d0ac246dfbc11a86<SNIP>       : file contents
+				meta:4b7fb8096e6413f0d0ac246dfbc11a86<SNIP>  : meta for the key (delete key)
+	*/
+
 	// get file POST from index
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
@@ -44,19 +56,36 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		}
 		defer file.Close()
 
-		// generate token and hash to save
-		token := tokenGen(config.Bitnuke.TokenSize, client)
-		hash := sha3.Sum512([]byte(token))
-		hashstr := fmt.Sprintf("%x", hash)
+		// generate all tokens/keys
+		fileId := tokenGen(config.Bitnuke.TokenSize, redisClient)
+		secToken := tokenGen(config.Bitnuke.SecTokenSize, redisClient)
+		delToken := tokenGen(config.Bitnuke.DelTokenSize, redisClient)
 
-		// generate security token for removing content
-		secToken := secTokenGen(hashstr, client)
-		w.Header().Set("token", token)
-		w.Header().Set("sec", secToken)
-		fmt.Fprintf(w, "%s", token)
+		// set client headers
+		w.Header().Set("file_id", fileId)
+		w.Header().Set("sec_key", secToken)
+		w.Header().Set("removal_key", delToken)
+		fmt.Fprintf(w, "%s", fileId)
 
-		// done with client, rest is server side
-		glogger.Debug.Println("uploading:", token)
+		glogger.Debug.Println("file id:       ", fileId)
+		glogger.Debug.Println("secret key:    ", secToken)
+		glogger.Debug.Println("delete token:  ", delToken)
+
+		// get sha3:512 of fileId
+		fileIdHash := sha3.Sum512([]byte(fileId))
+		longFileId := fmt.Sprintf("%x", fileIdHash)
+
+		// set meta:<hash> in redis
+		_, err = redisClient.HMSet(fmt.Sprintf("meta:%s", longFileId), map[string]string{
+			"deleteToken": delToken,
+			"filename":    filename,
+		}).Result()
+		if err != nil {
+			glogger.Error.Println("error setting meta<hash> key in redis")
+		}
+
+		// set <hash> (file) in redis
+		glogger.Debug.Println("uploading:", fileId)
 		// write file temporarily to get filesize
 		f, _ := os.OpenFile("tmpfile", os.O_WRONLY|os.O_CREATE, 0666)
 		defer f.Close()
@@ -72,13 +101,34 @@ func upload(w http.ResponseWriter, r *http.Request, client *redis.Client, state 
 		fReader.Read(buf)
 		fileBase64Str := base64.StdEncoding.EncodeToString(buf)
 
-		client.Set(hashstr, fileBase64Str, 0).Err()
-		client.Set(fmt.Sprintf("fname:%s", hashstr), filename, 0).Err()
+		//// encrypt file
+		//block, err := aes.NewCipher([]byte(secToken))
+		//if err != nil {
+		//	glogger.Error.Println("error creating new AES cipher")
+		//	panic(err.Error())
+		//}
+		//nonce := make([]byte, 12)
+		//if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		//	panic(err.Error())
+		//}
+		//aesgcm, err := cipher.NewGCM(block)
+		//if err != nil {
+		//	panic(err.Error())
+		//}
+
+		//encryptedFile := aesgcm.Seal(nil, nonce, []byte(fileBase64Str), nil)
+
+		encryptedFile, err := encrypt([]byte(secToken), []byte(fileBase64Str))
+		if err != nil {
+			glogger.Debug.Println("error encrypting file")
+		}
+		fmt.Printf("%0x\n", encryptedFile)
+		redisClient.Set(fmt.Sprintf("%s", longFileId), fmt.Sprintf("%0x", encryptedFile), 0).Err()
+
+		// expire if not coming from /supload
 		if strings.EqualFold(state, "tmp") {
-			// expire if not coming from /supload
-			client.Expire(hashstr, (config.Bitnuke.TTL * time.Hour)).Err()
-			client.Expire(fmt.Sprintf("sec:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
-			client.Expire(fmt.Sprintf("filename:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
+			redisClient.Expire(fmt.Sprintf("%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
+			redisClient.Expire(fmt.Sprintf("meta:%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
 			glogger.Debug.Println("expire link generated")
 		}
 		os.Remove("tmpfile")

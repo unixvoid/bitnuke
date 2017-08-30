@@ -8,7 +8,7 @@ import (
 
 	"github.com/unixvoid/glogger"
 	"golang.org/x/crypto/sha3"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 func linkcompressor(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {

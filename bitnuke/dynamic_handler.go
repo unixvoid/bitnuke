@@ -11,16 +11,17 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/unixvoid/glogger"
 	"golang.org/x/crypto/sha3"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 	vars := mux.Vars(r)
-	fdata := vars["fdata"]
+	dataId := vars["dataId"]
+	secureKey := vars["secureKey"]
 
 	// hash the token that is passed
-	hash := sha3.Sum512([]byte(fdata))
-	hashstr := fmt.Sprintf("%x", hash)
+	fileIdHash := sha3.Sum512([]byte(dataId))
+	longFileId := fmt.Sprintf("%x", fileIdHash)
 
 	// get the client's ip
 	ip := strings.Split(r.RemoteAddr, ":")[0]
@@ -37,20 +38,50 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	}
 
 	// try and pull the data from redis
-	val, err := redisClient.Get(hashstr).Result()
-	filename, err := redisClient.Get(fmt.Sprintf("fname:%s", hashstr)).Result()
+	val, err := redisClient.Get(longFileId).Result()
+	filename, err := redisClient.HGet(fmt.Sprintf("meta:%s", longFileId), "filename").Result()
 	if err != nil {
 		// handle the error if the token does not exist
-		glogger.Debug.Printf("data does not exist %s :: from: %s\n", fdata, ip)
+		glogger.Debug.Printf("data does not exist %s :: from: %s\n", dataId, ip)
 		fmt.Fprintf(w, "token not found")
 	} else {
 		// serve up the content to the client
-		glogger.Debug.Printf("Responsing to %s :: from: %s\n", fdata, ip)
+		glogger.Debug.Printf("Responsing to %s :: from: %s\n", dataId, ip)
 
-		decodeVal, _ := base64.StdEncoding.DecodeString(val)
+		// DEBUG
+		glogger.Debug.Printf("file id:    %s\n", dataId)
+		glogger.Debug.Printf("secure key: %s\n", secureKey)
+		glogger.Debug.Printf("val:        %s\n", val)
+
+		// unencrypt base 64 file with key
+		//nonce, _ := hex.DecodeString("37b8e8a308c354048d245f6d")
+
+		//block, err := aes.NewCipher([]byte(secureKey))
+		//if err != nil {
+		//	panic(err.Error())
+		//}
+
+		//aesgcm, err := cipher.NewGCM(block)
+		//if err != nil {
+		//	panic(err.Error())
+		//}
+
+		//plainFile, err := aesgcm.Open(nil, nonce, decodeVal, nil)
+		//if err != nil {
+		//	panic(err.Error())
+		//}
+		plainFile, err := decrypt([]byte(secureKey), []byte(val))
+		if err != nil {
+			glogger.Debug.Println("error decrypting file")
+			panic(err.Error())
+		}
+		decodeVal, _ := base64.StdEncoding.DecodeString(string(plainFile))
+		fmt.Printf("%s\n", decodeVal)
+
+		//fmt.Printf("yeet: %s\n", string(plainFile))
 
 		file, _ := os.Create("tmpfile")
-		io.WriteString(file, string(decodeVal))
+		io.WriteString(file, string(plainFile))
 		file.Close()
 
 		// dont add the filename header to links

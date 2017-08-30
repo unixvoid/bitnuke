@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/sha3"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 func remove(w http.ResponseWriter, r *http.Request, client *redis.Client) {

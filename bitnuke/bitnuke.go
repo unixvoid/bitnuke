@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/unixvoid/glogger"
 	"gopkg.in/gcfg.v1"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 type Config struct {
@@ -20,6 +20,7 @@ type Config struct {
 		Port            int
 		TokenSize       int
 		SecTokenSize    int
+		DelTokenSize    int
 		LinkTokenSize   int
 		TTL             time.Duration
 		TokenDictionary string
@@ -78,7 +79,7 @@ func main() {
 		// client wants favicon, send back a does not exist
 		w.WriteHeader(http.StatusNotFound)
 	}).Methods("GET")
-	router.HandleFunc("/{fdata}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/{dataId}/{secureKey}", func(w http.ResponseWriter, r *http.Request) {
 		handlerdynamic(w, r, redisClient)
 	}).Methods("GET")
 	//log.Fatal(http.ListenAndServe(bitport, router))

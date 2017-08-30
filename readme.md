@@ -16,3 +16,19 @@ security token (as header)
 
 ### License
 Bitnuke is distributed under the **MIT license**.  See LICENSE in the root of the project for details. 
+
+
+TODO
+----
+- 3 keys
+  - short key "c4b08d47a0" used as the file id in redis
+  - access/decrypt key "J7-SlI42BL2v7_AMJd1Adw" used to encrypt/decrypt the key
+  - removal key "226f4fe893dbc6bd695c" used to remove a key before expiration time
+
+  access, delete, key
+
+  - 4b7fb8096e6413f0d0ac246dfbc11a86<SNIP> the sha3:512 hashed 'c4b08d47a0', the content is the file encrypted with the access/decrypt key
+  - meta:4b7fb8096e6413f0d0ac246dfbc11a86<SNIP> 'meta'the sha3:512 hashed 'c4b08d47a0', the contents are meta info about the key encrypted with the access/decrypt key
+
+encrypt meta key
+https://stackoverflow.com/questions/18817336/golang-encrypting-a-string-with-aes-and-base64

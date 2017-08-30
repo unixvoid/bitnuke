@@ -1,12 +1,13 @@
 [bitnuke]
   loglevel            = "debug"
   port                = 8808
-  tokensize           = 6
-  sectokensize        = 25
+  tokensize           = 8
+  sectokensize        = 32
+  deltokensize        = 20
   linktokensize       = 4
   ttl                 = 12
-  tokendictionary     = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-  secdictionary       = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  tokendictionary     = "0123456789abcdefghijklmnopqrstuvwxyz"
+  secdictionary       = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
   bootstrapdelay      = 1
 
 [redis]
