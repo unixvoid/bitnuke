@@ -49,39 +49,20 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		glogger.Debug.Printf("Responsing to %s :: from: %s\n", dataId, ip)
 
 		// DEBUG
-		glogger.Debug.Printf("file id:    %s\n", dataId)
-		glogger.Debug.Printf("secure key: %s\n", secureKey)
-		glogger.Debug.Printf("val:        %s\n", val)
+		//glogger.Debug.Printf("file id:    %s\n", dataId)
+		//glogger.Debug.Printf("secure key: %s\n", secureKey)
+		//glogger.Debug.Printf("val:        %s\n", val)
 
-		// unencrypt base 64 file with key
-		//nonce, _ := hex.DecodeString("37b8e8a308c354048d245f6d")
-
-		//block, err := aes.NewCipher([]byte(secureKey))
-		//if err != nil {
-		//	panic(err.Error())
-		//}
-
-		//aesgcm, err := cipher.NewGCM(block)
-		//if err != nil {
-		//	panic(err.Error())
-		//}
-
-		//plainFile, err := aesgcm.Open(nil, nonce, decodeVal, nil)
-		//if err != nil {
-		//	panic(err.Error())
-		//}
+		// decrypt
 		plainFile, err := decrypt([]byte(secureKey), []byte(val))
 		if err != nil {
 			glogger.Debug.Println("error decrypting file")
 			panic(err.Error())
 		}
 		decodeVal, _ := base64.StdEncoding.DecodeString(string(plainFile))
-		fmt.Printf("%s\n", decodeVal)
-
-		//fmt.Printf("yeet: %s\n", string(plainFile))
 
 		file, _ := os.Create("tmpfile")
-		io.WriteString(file, string(plainFile))
+		io.WriteString(file, string(decodeVal))
 		file.Close()
 
 		// dont add the filename header to links

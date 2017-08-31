@@ -101,29 +101,14 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		fReader.Read(buf)
 		fileBase64Str := base64.StdEncoding.EncodeToString(buf)
 
-		//// encrypt file
-		//block, err := aes.NewCipher([]byte(secToken))
-		//if err != nil {
-		//	glogger.Error.Println("error creating new AES cipher")
-		//	panic(err.Error())
-		//}
-		//nonce := make([]byte, 12)
-		//if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		//	panic(err.Error())
-		//}
-		//aesgcm, err := cipher.NewGCM(block)
-		//if err != nil {
-		//	panic(err.Error())
-		//}
-
-		//encryptedFile := aesgcm.Seal(nil, nonce, []byte(fileBase64Str), nil)
-
+		// encrypt file
 		encryptedFile, err := encrypt([]byte(secToken), []byte(fileBase64Str))
 		if err != nil {
 			glogger.Debug.Println("error encrypting file")
+			panic(err.Error())
 		}
 		fmt.Printf("%0x\n", encryptedFile)
-		redisClient.Set(fmt.Sprintf("%s", longFileId), fmt.Sprintf("%0x", encryptedFile), 0).Err()
+		redisClient.Set(fmt.Sprintf("%s", longFileId), encryptedFile, 0).Err()
 
 		// expire if not coming from /supload
 		if strings.EqualFold(state, "tmp") {
