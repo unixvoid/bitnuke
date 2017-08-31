@@ -65,11 +65,16 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		w.Header().Set("file_id", fileId)
 		w.Header().Set("sec_key", secToken)
 		w.Header().Set("removal_key", delToken)
-		fmt.Fprintf(w, "%s", fileId)
 
-		glogger.Debug.Println("file id:       ", fileId)
-		glogger.Debug.Println("secret key:    ", secToken)
-		glogger.Debug.Println("delete token:  ", delToken)
+		expiration := time.Now().Add(24 * time.Hour)
+		cookie := http.Cookie{Name: fileId, Value: secToken, Expires: expiration}
+		http.SetCookie(w, &cookie)
+
+		fmt.Fprintf(w, "%s/%s", fileId, secToken)
+
+		//glogger.Debug.Println("file id:       ", fileId)
+		//glogger.Debug.Println("secret key:    ", secToken)
+		//glogger.Debug.Println("delete token:  ", delToken)
 
 		// encrypt fileId
 		encryptedFilename, err := encrypt([]byte(secToken), []byte(filename))

@@ -45,6 +45,8 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		glogger.Debug.Printf("data does not exist %s :: from: %s\n", dataId, ip)
 		fmt.Fprintf(w, "token not found")
 	} else {
+		// token exists, try and decrypt
+
 		// serve up the content to the client
 		glogger.Debug.Printf("Responsing to %s :: from: %s\n", dataId, ip)
 
@@ -56,8 +58,10 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		// decrypt
 		plainFile, err := decrypt([]byte(secureKey), []byte(val))
 		if err != nil {
-			glogger.Debug.Println("error decrypting file")
-			panic(err.Error())
+			glogger.Debug.Println("unauthorized access.")
+			// error decrypting file, looks like the wrong key
+			w.WriteHeader(http.StatusForbidden)
+			return
 		}
 		decodeVal, _ := base64.StdEncoding.DecodeString(string(plainFile))
 
