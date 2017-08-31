@@ -71,14 +71,27 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		glogger.Debug.Println("secret key:    ", secToken)
 		glogger.Debug.Println("delete token:  ", delToken)
 
+		// encrypt fileId
+		encryptedFilename, err := encrypt([]byte(secToken), []byte(filename))
+		if err != nil {
+			glogger.Debug.Println("error encrypting filename")
+			panic(err.Error())
+		}
+		// encrypt delToken
+		encryptedDelToken, err := encrypt([]byte(secToken), []byte(delToken))
+		if err != nil {
+			glogger.Debug.Println("error encrypting delete token")
+			panic(err.Error())
+		}
+
 		// get sha3:512 of fileId
 		fileIdHash := sha3.Sum512([]byte(fileId))
 		longFileId := fmt.Sprintf("%x", fileIdHash)
 
 		// set meta:<hash> in redis
 		_, err = redisClient.HMSet(fmt.Sprintf("meta:%s", longFileId), map[string]string{
-			"deleteToken": delToken,
-			"filename":    filename,
+			"filename":    string(encryptedFilename),
+			"deleteToken": string(encryptedDelToken),
 		}).Result()
 		if err != nil {
 			glogger.Error.Println("error setting meta<hash> key in redis")
@@ -107,7 +120,7 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 			glogger.Debug.Println("error encrypting file")
 			panic(err.Error())
 		}
-		fmt.Printf("%0x\n", encryptedFile)
+		//fmt.Printf("%0x\n", encryptedFile)
 		redisClient.Set(fmt.Sprintf("%s", longFileId), encryptedFile, 0).Err()
 
 		// expire if not coming from /supload

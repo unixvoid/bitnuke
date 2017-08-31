@@ -39,7 +39,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 
 	// try and pull the data from redis
 	val, err := redisClient.Get(longFileId).Result()
-	filename, err := redisClient.HGet(fmt.Sprintf("meta:%s", longFileId), "filename").Result()
+	encryptedFilename, err := redisClient.HGet(fmt.Sprintf("meta:%s", longFileId), "filename").Result()
 	if err != nil {
 		// handle the error if the token does not exist
 		glogger.Debug.Printf("data does not exist %s :: from: %s\n", dataId, ip)
@@ -65,8 +65,15 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		io.WriteString(file, string(decodeVal))
 		file.Close()
 
+		// unencrypt filename
+		filename, err := decrypt([]byte(secureKey), []byte(encryptedFilename))
+		if err != nil {
+			glogger.Debug.Println("error decrypting filename")
+			panic(err.Error())
+		}
+
 		// dont add the filename header to links
-		if filename != "bitnuke:link" {
+		if string(filename) != "bitnuke:link" {
 			finalFname := fmt.Sprintf("INLINE; filename=%s", filename)
 			w.Header().Set("Content-Disposition", finalFname)
 		}
