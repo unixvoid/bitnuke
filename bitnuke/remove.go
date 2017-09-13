@@ -5,40 +5,52 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/unixvoid/glogger"
 	"golang.org/x/crypto/sha3"
 	"gopkg.in/redis.v5"
 )
 
-func remove(w http.ResponseWriter, r *http.Request, client *redis.Client) {
+func remove(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 	// parse form and values
 	r.ParseForm()
-	clientToken := strings.TrimSpace(r.FormValue("token"))
-	clientSec := strings.TrimSpace(r.FormValue("sec"))
-	//hash := sha3.Sum512([]byte(clientToken))
-	clientHash := fmt.Sprintf("%x", sha3.Sum512([]byte(clientToken)))
-	clientSecHash := fmt.Sprintf("%x", sha3.Sum512([]byte(clientSec)))
+	fileId := strings.TrimSpace(r.FormValue("file_id"))
+	secureKey := strings.TrimSpace(r.FormValue("sec_key"))
+	deleteToken := strings.TrimSpace(r.FormValue("removal_key"))
+
 	// verify all params sent
-	if len(clientToken) == 0 || len(clientSec) == 0 {
+	if len(fileId) == 0 || len(deleteToken) == 0 || len(secureKey) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// sha3:512 hash the file id to get the long id
+	longFileId := fmt.Sprintf("%x", sha3.Sum512([]byte(fileId)))
+
 	// make sure token exists
-	_, err := client.Get(clientHash).Result()
-	if err == redis.Nil {
-		// id does not exist
+	encryptedDeleteToken, err := redisClient.HGet(fmt.Sprintf("meta:%s", longFileId), "deleteToken").Result()
+	if err != nil {
+		glogger.Debug.Println("token does not exist")
 		w.WriteHeader(http.StatusNotFound)
 		return
+	}
+
+	// try and decrypt the delete token
+	unencryptedDeleteToken, err := decrypt([]byte(secureKey), []byte(encryptedDeleteToken))
+	if err != nil {
+		glogger.Debug.Println("error decrypting delete token :: forbidden")
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	// see if the delete token matches the client provided one
+	if deleteToken == string(unencryptedDeleteToken) {
+		// client is authed to remove data
+		redisClient.Del(fmt.Sprintf("%s", longFileId))
+		redisClient.Del(fmt.Sprintf("meta:%s", longFileId))
 	} else {
-		// id exists, verify that auth matches
-		storedSec, _ := client.Get(fmt.Sprintf("sec:%s", clientHash)).Result()
-		if storedSec == clientSecHash {
-			// authed. remove token
-			client.Del(clientHash)
-			client.Del(fmt.Sprintf("sec:%s", clientHash))
-		} else {
-			// forbidden
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+		// client is not authed to remove data
+		glogger.Debug.Println("delete tokens do not match :: forbidden")
+		w.WriteHeader(http.StatusForbidden)
+		return
 	}
 }

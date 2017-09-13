@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,6 +18,13 @@ import (
 	"golang.org/x/crypto/sha3"
 	"gopkg.in/redis.v5"
 )
+
+// the `json:""` is so we can have fields without capital letters
+type CValue struct {
+	File_id     string `json:"file_id"`
+	Sec_key     string `json:"sec_key"`
+	Removal_key string `json:"removal_key"`
+}
 
 func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, state string) {
 	/*
@@ -66,10 +74,20 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		w.Header().Set("sec_key", secToken)
 		w.Header().Set("removal_key", delToken)
 
+		// generate json for cookie
+		cVal := &CValue{
+			File_id:     fileId,
+			Sec_key:     secToken,
+			Removal_key: delToken,
+		}
+		b, _ := json.Marshal(cVal)
+		base64JsonC := base64.StdEncoding.EncodeToString(b)
+
 		expiration := time.Now().Add(24 * time.Hour)
-		cookie := http.Cookie{Name: fileId, Value: secToken, Expires: expiration}
+		cookie := http.Cookie{Name: fileId, Value: base64JsonC, Expires: expiration}
 		http.SetCookie(w, &cookie)
 
+		// return file_id and sec_key to client
 		fmt.Fprintf(w, "%s/%s", fileId, secToken)
 
 		//glogger.Debug.Println("file id:       ", fileId)
