@@ -22,6 +22,7 @@ import (
 // the `json:""` is so we can have fields without capital letters
 type CValue struct {
 	File_id     string `json:"file_id"`
+	File_name   string `json:"file_name"`
 	Sec_key     string `json:"sec_key"`
 	Removal_key string `json:"removal_key"`
 }
@@ -77,6 +78,7 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		// generate json for cookie
 		cVal := &CValue{
 			File_id:     fileId,
+			File_name:   filename,
 			Sec_key:     secToken,
 			Removal_key: delToken,
 		}
