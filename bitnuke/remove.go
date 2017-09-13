@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/unixvoid/glogger"
 	"golang.org/x/crypto/sha3"
@@ -44,6 +45,10 @@ func remove(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 
 	// see if the delete token matches the client provided one
 	if deleteToken == string(unencryptedDeleteToken) {
+		// expire the cookie client-side
+		cookie := http.Cookie{Name: fileId, Expires: time.Now().Add(-100 * time.Hour)}
+		http.SetCookie(w, &cookie)
+
 		// client is authed to remove data
 		redisClient.Del(fmt.Sprintf("%s", longFileId))
 		redisClient.Del(fmt.Sprintf("meta:%s", longFileId))
