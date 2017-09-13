@@ -15,6 +15,7 @@ dependencies:
 
 daemon:
 	bin/bitnuke &
+
 bitnuke:
 	$(GOC) bitnuke.go
 
