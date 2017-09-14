@@ -179,13 +179,19 @@ h1 span {
 }
 
 #writezone2 table {
+  border-collapse: collapse;
   border-spacing: 5px;
   padding: 15px;
   text-align: left;
 }
 
+#writezone2 th {
+  padding: 6px 15px 6px 15px;
+  background-color: rgba(0, 0, 0, .2) !important;
+}
+
 #writezone2 td {
-  padding: 0 15px 0 0;
+  padding: 2px 15px 2px 15px;
 }
 
 #writezone2 a,
