@@ -28,6 +28,11 @@
       </center>
 
       <script>
+        function removeLink(file_id, sec_key, removal_key) {
+          console.log(removal_key);
+          // do a post to /remove
+        }
+
         Dropzone.options.droppy = {
         method: "post",
         maxFilesize: 512,
@@ -55,8 +60,10 @@
             console.log(name + ' :: ' + value.file_name);
             //console.log(value);
 
-
-            document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' + value.file_name;
+            //document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' + value.file_name;
+            // call removeLink() with options to send to POST
+            document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
+              '<a id=test href="#" onclick="removeLink(\'' + name + ',' + value.sec_key + ',' + value.removal_key +'\');">' + value.file_name + '</a>';
           }
         }
       </script>
