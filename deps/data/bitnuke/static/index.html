@@ -32,7 +32,8 @@
           console.log(removal_key);
           // do a post to /remove
           var xhttp = new XMLHttpRequest();
-          xhttp.open("POST", "http://192.168.0.2:8808/remove", true);
+          xhttp.open("POST", "/remove", true);
+          xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
           xhttp.send("file_id=" + file_id +
               "&sec_key=" + sec_key +
               "&removal_key=" + removal_key);
