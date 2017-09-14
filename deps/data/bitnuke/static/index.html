@@ -29,7 +29,7 @@
 
       <script>
         function removeLink(file_id, sec_key, removal_key) {
-          console.log(removal_key);
+          //console.log(removal_key);
           // do a post to /remove
           var xhttp = new XMLHttpRequest();
           xhttp.open("POST", "/remove", true);
@@ -59,17 +59,21 @@
           for (var i = 0 ; i < allCookies.length; i++) {
             var tmpCookie = allCookies[i].split(/=(.+)/);
             var name = tmpCookie[0];
+            name = name.replace(/\s+/g, '');       // remove spaces
             encodedString = tmpCookie[1]
             decodedString = atob(encodedString);
             var value = JSON.parse(decodedString);
 
-            console.log(name + ' :: ' + value.file_name);
+            //console.log(name + ' :: ' + value.file_name);
             //console.log(value);
 
-            //document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' + value.file_name;
             // call removeLink() with options to send to POST
+            //document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
+            //  '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">' + value.file_name + '</a>';
             document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
-              '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">' + value.file_name + '</a>';
+              value.file_name + '&emsp;&emsp;' +
+              '<a id=test href="/' + name + '/' + value.sec_key + '">link</a>' + ' &nbsp;&nbsp;' +
+              '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">remove</a>';
           }
         }
       </script>

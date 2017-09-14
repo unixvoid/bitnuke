@@ -172,6 +172,13 @@ h1 span {
   color: #3f3f3f;
 }
 
+#writezone2 {
+  color: gray;
+  text-decoration: none;
+  font-weight: normal;
+}
+
+#writezone2 a,
 #writezone a {
   color: gray;
   text-decoration: none;
