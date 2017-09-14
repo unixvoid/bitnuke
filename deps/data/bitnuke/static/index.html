@@ -39,7 +39,31 @@
               "&sec_key=" + sec_key +
               "&removal_key=" + removal_key);
 
-          // reload the table
+          // reload the page/update table
+          location.reload();
+        }
+
+        function checkCookies() {
+          // initiate data table
+          var targetTable = "<table><tr><th>Link</th><th>Delete</th></tr>";
+          var allCookies = document.cookie.split(';');
+          if (allCookies != "") {
+            for (var i = 0 ; i < allCookies.length; i++) {
+              var tmpCookie = allCookies[i].split(/=(.+)/);
+              var name = tmpCookie[0];
+              name = name.replace(/\s+/g, '');       // remove spaces
+              encodedString = tmpCookie[1]
+              decodedString = atob(encodedString);
+              var value = JSON.parse(decodedString);
+
+              // build table with data
+              targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+              targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
+
+            }
+            targetTable += '</table>';
+            document.getElementById("writezone2").innerHTML = targetTable;
+          }
         }
 
         Dropzone.options.droppy = {
@@ -50,33 +74,14 @@
             this.on("success", function(file, response) {
               this.removeAllFiles();
               document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
+              checkCookies();
             });
           }
         };
+        checkCookies();
 
         console.log("bitnuke.io")
         console.log("see you in 12 hours...")
-
-        // initiate data table
-        var targetTable = "<table><tr><th>Link</th><th>Delete</th></tr>";
-        var allCookies = document.cookie.split(';');
-        if (allCookies != "") {
-          for (var i = 0 ; i < allCookies.length; i++) {
-            var tmpCookie = allCookies[i].split(/=(.+)/);
-            var name = tmpCookie[0];
-            name = name.replace(/\s+/g, '');       // remove spaces
-            encodedString = tmpCookie[1]
-            decodedString = atob(encodedString);
-            var value = JSON.parse(decodedString);
-
-            // build table with data
-            targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
-            targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
-
-          }
-          targetTable += '</table>';
-          document.getElementById("writezone2").innerHTML = targetTable;
-        }
       </script>
       <div class=footer>
         <center>
