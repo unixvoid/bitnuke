@@ -185,6 +185,10 @@ h1 span {
   text-align: left;
 }
 
+#min_width {
+  min-width: 300px;
+}
+
 #removal {
   text-align: center;
 }

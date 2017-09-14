@@ -45,7 +45,7 @@
 
         function checkCookies() {
           // initiate data table
-          var targetTable = "<table><tr><th>Link</th><th>Delete</th></tr>";
+          var targetTable = "<table><tr><th id=min_width>Link</th><th>Delete</th></tr>";
           var allCookies = document.cookie.split(';');
           if (allCookies != "") {
             for (var i = 0 ; i < allCookies.length; i++) {
