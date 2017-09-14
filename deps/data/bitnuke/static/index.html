@@ -31,6 +31,11 @@
         function removeLink(file_id, sec_key, removal_key) {
           console.log(removal_key);
           // do a post to /remove
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("POST", "http://192.168.0.2:8808/remove", true);
+          xhttp.send("file_id=" + file_id +
+              "&sec_key=" + sec_key +
+              "&removal_key=" + removal_key);
         }
 
         Dropzone.options.droppy = {
@@ -63,7 +68,7 @@
             //document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' + value.file_name;
             // call removeLink() with options to send to POST
             document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
-              '<a id=test href="#" onclick="removeLink(\'' + name + ',' + value.sec_key + ',' + value.removal_key +'\');">' + value.file_name + '</a>';
+              '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">' + value.file_name + '</a>';
           }
         }
       </script>
