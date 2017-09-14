@@ -54,6 +54,8 @@
         console.log("bitnuke.io")
         console.log("see you in 12 hours...")
 
+        // initiate data table
+        var targetTable = "<table><tr><th>File</th><th>Link</th><th>Delete</th></tr>";
         var allCookies = document.cookie.split(';');
         if (allCookies != "") {
           for (var i = 0 ; i < allCookies.length; i++) {
@@ -64,41 +66,37 @@
             decodedString = atob(encodedString);
             var value = JSON.parse(decodedString);
 
-            //console.log(name + ' :: ' + value.file_name);
-            //console.log(value);
+            // build table with data
+            targetTable += '<tr><td>'+value.file_name+'</td>';
+            targetTable += '<td><a id=test href="/'+name+'/'+value.sec_key+'">link</a></td>';
+            targetTable += '<td><a id=test href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">remove</a</td></tr>';
 
-            // call removeLink() with options to send to POST
-            //document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
-            //  '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">' + value.file_name + '</a>';
-            document.getElementById("writezone2").innerHTML = document.getElementById("writezone2").innerHTML + '</br>' +
-              value.file_name + '&emsp;&emsp;' +
-              '<a id=test href="/' + name + '/' + value.sec_key + '">link</a>' + ' &nbsp;&nbsp;' +
-              '<a id=test href="#" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key +'\');">remove</a>';
           }
+          targetTable += '</table>';
+          document.getElementById("writezone2").innerHTML = targetTable;
         }
       </script>
-          <div class=footer>
-            <center>
-                <div class=leftfoot>
-                  Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a>
-          	<a class=flink href="https://github.com/unixvoid/bitnuke">//v0.10.4</a>
-                </div>
-                <div class=rightfoot>
-                  <a class=flink href="/persist">//persistent_uploads</a>
-          	  <a class=flink href="/link">//link_shortener</a>
-          	  <a class=flink class=button href="#about">//about</a>
-                </div>
-            </center>
-          </div>
-
-          <div id=about class=overlay>
-            <div class="popup">
-              <a class="close" href="#">x</a>
-              <div class=popupcontent>
-                bitnuke.io is an anonymous temporary file storage site. Your files are stored for 12 hours and then deleted permanently.
-              </div>
+      <div class=footer>
+        <center>
+            <div class=leftfoot>
+              Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a>
+              <a class=flink href="https://github.com/unixvoid/bitnuke">//v0.10.4</a>
             </div>
+            <div class=rightfoot>
+              <a class=flink href="/persist">//persistent_uploads</a>
+              <a class=flink href="/link">//link_shortener</a>
+              <a class=flink class=button href="#about">//about</a>
+            </div>
+        </center>
+      </div>
+      <div id=about class=overlay>
+        <div class="popup">
+          <a class="close" href="#">x</a>
+          <div class=popupcontent>
+            bitnuke.io is an anonymous temporary file storage site. Your files are stored for 12 hours and then deleted permanently.
           </div>
+        </div>
+      </div>
     </body>
   </div>
 </html>
