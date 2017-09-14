@@ -25,7 +25,7 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  background: linear-gradient( rgba(0,0,0,0.15), rgba(0,0,0,.3) 80% );
+  background: linear-gradient( rgba(212, 31, 31, 0.15), rgba(0,0,0,.3) 80% );
 }
 
 .dropmsg {
@@ -183,6 +183,10 @@ h1 span {
   border-spacing: 5px;
   padding: 15px;
   text-align: left;
+}
+
+#removal {
+  text-align: center;
 }
 
 #writezone2 th {

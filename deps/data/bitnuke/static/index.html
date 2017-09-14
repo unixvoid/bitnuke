@@ -24,6 +24,7 @@
         </form>
       </div></br>
       <div id=writezone></div>
+      </br>
       <div id=writezone2></div>
       </center>
 
@@ -37,6 +38,8 @@
           xhttp.send("file_id=" + file_id +
               "&sec_key=" + sec_key +
               "&removal_key=" + removal_key);
+
+          // reload the table
         }
 
         Dropzone.options.droppy = {
@@ -55,7 +58,7 @@
         console.log("see you in 12 hours...")
 
         // initiate data table
-        var targetTable = "<table><tr><th>File</th><th>Link</th><th>Delete</th></tr>";
+        var targetTable = "<table><tr><th>Link</th><th>Delete</th></tr>";
         var allCookies = document.cookie.split(';');
         if (allCookies != "") {
           for (var i = 0 ; i < allCookies.length; i++) {
@@ -67,9 +70,8 @@
             var value = JSON.parse(decodedString);
 
             // build table with data
-            targetTable += '<tr><td>'+value.file_name+'</td>';
-            targetTable += '<td><a id=test href="/'+name+'/'+value.sec_key+'">link</a></td>';
-            targetTable += '<td><a id=test href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">remove</a</td></tr>';
+            targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+            targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
 
           }
           targetTable += '</table>';
