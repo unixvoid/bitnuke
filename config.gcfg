@@ -5,7 +5,7 @@
   sectokensize        = 32
   deltokensize        = 20
   linktokensize       = 4
-  ttl                 = 12
+  ttl                 = 24
   tokendictionary     = "0123456789abcdefghijklmnopqrstuvwxyz"
   secdictionary       = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
   bootstrapdelay      = 1
