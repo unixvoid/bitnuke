@@ -167,8 +167,15 @@ h1 span {
   opacity: 1;
 }
 
+#pre_logo {
+  padding-top: 150px;
+}
+
 #logo {
-  padding: 90px;
+}
+
+#post_logo {
+  padding-top: 40px;
 }
 
 #writezone {
