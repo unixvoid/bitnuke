@@ -16,7 +16,7 @@ body {
 }
 
 .bg {
-  background-color: #5056b0;
+  background-color: #484547;
   background-repeat: no-repeat;
 }
 
@@ -27,7 +27,7 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  background: linear-gradient( rgba(212, 31, 31, 0.15), rgba(0,0,0,.3) 80% );
+  background: linear-gradient( rgba(0, 0, 0, 0.15), rgba(0,0,0,.3) 80% );
 }
 
 .dropmsg {
@@ -196,6 +196,7 @@ h1 span {
 }
 
 #writezone2 th {
+  color: #9c9c9c;
   padding: 6px 15px 6px 15px;
   background-color: rgba(0, 0, 0, .2) !important;
 }
@@ -206,7 +207,7 @@ h1 span {
 
 #writezone2 a,
 #writezone a {
-  color: gray;
+  color: #9c9c9c;
   text-decoration: none;
   font-weight: normal;
 }
