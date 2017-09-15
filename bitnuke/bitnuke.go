@@ -69,9 +69,6 @@ func main() {
 	router.HandleFunc("/remove", func(w http.ResponseWriter, r *http.Request) {
 		remove(w, r, redisClient)
 	})
-	router.HandleFunc("/supload", func(w http.ResponseWriter, r *http.Request) {
-		upload(w, r, redisClient, "persist")
-	})
 	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
 		linkcompressor(w, r, redisClient)
 	})

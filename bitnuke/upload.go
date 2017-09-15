@@ -148,12 +148,10 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		//fmt.Printf("%0x\n", encryptedFile)
 		redisClient.Set(fmt.Sprintf("%s", longFileId), encryptedFile, 0).Err()
 
-		// expire if not coming from /supload
-		if strings.EqualFold(state, "tmp") {
-			redisClient.Expire(fmt.Sprintf("%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
-			redisClient.Expire(fmt.Sprintf("meta:%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
-			glogger.Debug.Println("expire link generated")
-		}
+		// expire data
+		redisClient.Expire(fmt.Sprintf("%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
+		redisClient.Expire(fmt.Sprintf("meta:%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
+		glogger.Debug.Println("expire link generated")
 		os.Remove("tmpfile")
 	}
 }
