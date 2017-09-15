@@ -22,7 +22,7 @@ after_success:
   - curl -d sec=$BINDER_SEC -d key=unixvoid.sec https://cryo.unixvoid.com/getfile --output unixvoid.sec
   # sign build and sign aci
   - make clean build_travis_aci
-  - mv bitnuke-api.aci bitnuke-api-latest-linux-amd64.aci
+  - mv bitnuke-api.aci bitnuke-api-0.20.1-linux-amd64.aci
   - cp deps/sign.sh . && chmod +x sign.sh
   - ./sign.sh $GPG_SEC
   # upload bitnuke aci image
