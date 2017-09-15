@@ -13,6 +13,7 @@ body {
   padding-top: 3%;
   background-image: url("bitnuke_background.png");
   background-size: cover;
+  height: 100vh;
 }
 
 .bg {
