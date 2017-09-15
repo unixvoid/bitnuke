@@ -79,6 +79,9 @@ func main() {
 	router.HandleFunc("/{dataId}/{secureKey}", func(w http.ResponseWriter, r *http.Request) {
 		handlerdynamic(w, r, redisClient)
 	}).Methods("GET")
+	router.HandleFunc("/{dataId}", func(w http.ResponseWriter, r *http.Request) {
+		linkhandler(w, r, redisClient)
+	}).Methods("GET")
 	//log.Fatal(http.ListenAndServe(bitport, router))
 
 	glogger.Info.Println("started server on", config.Bitnuke.Port)
