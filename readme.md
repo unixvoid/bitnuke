@@ -32,3 +32,7 @@ TODO
 
 encrypt meta key
 https://stackoverflow.com/questions/18817336/golang-encrypting-a-string-with-aes-and-base64
+
+Contributions
+-------------
+- Shoutout to [JenksMedia](https://github.com/JenksMedia) for the custom background
