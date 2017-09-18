@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -65,9 +66,15 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		}
 		decodeVal, _ := base64.StdEncoding.DecodeString(string(plainFile))
 
+		// force garbage collection
+		runtime.GC()
+
 		file, _ := os.Create("tmpfile")
 		io.WriteString(file, string(decodeVal))
 		file.Close()
+
+		// force garbage collection
+		runtime.GC()
 
 		// unencrypt filename
 		filename, err := decrypt([]byte(secureKey), []byte(encryptedFilename))
