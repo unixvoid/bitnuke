@@ -20,6 +20,8 @@ Bitnuke is distributed under the **MIT license**.  See LICENSE in the root of th
 
 TODO
 ----
+- sanitize filenames
+
 - 3 keys
   - short key "c4b08d47a0" used as the file id in redis
   - access/decrypt key "J7-SlI42BL2v7_AMJd1Adw" used to encrypt/decrypt the key
