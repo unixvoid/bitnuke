@@ -16,16 +16,18 @@ import (
 
 type Config struct {
 	Bitnuke struct {
-		Loglevel        string
-		Port            int
-		TokenSize       int
-		SecTokenSize    int
-		DelTokenSize    int
-		LinkTokenSize   int
-		TTL             time.Duration
-		TokenDictionary string
-		SecDictionary   string
-		BootstrapDelay  time.Duration
+		Loglevel            string
+		Port                int
+		FileStorePath       string
+		JanitorSleepSeconds time.Duration
+		TokenSize           int
+		SecTokenSize        int
+		DelTokenSize        int
+		LinkTokenSize       int
+		TTL                 time.Duration
+		TokenDictionary     string
+		SecDictionary       string
+		BootstrapDelay      time.Duration
 	}
 
 	Redis struct {
@@ -60,6 +62,17 @@ func main() {
 	} else {
 		glogger.Debug.Println("connection to redis succeeded.")
 	}
+
+	// create the filestore dir if it does not exist
+	_, err := os.Stat(config.Bitnuke.FileStorePath)
+	if err != nil {
+		// dir does not exist, create it
+		glogger.Debug.Printf("creating directory: %s\n", config.Bitnuke.FileStorePath)
+		os.Mkdir(config.Bitnuke.FileStorePath, os.ModePerm)
+	}
+
+	// fire up the janitor to monitor expire times
+	go janitor(redisClient)
 
 	// all handlers. lookin funcy casue i have to pass redis handler
 	router := mux.NewRouter().StrictSlash(true)
@@ -119,4 +132,47 @@ func initRedisConnection() (*redis.Client, error) {
 
 	_, redisErr := redisClient.Ping().Result()
 	return redisClient, redisErr
+}
+
+func janitor(redisClient *redis.Client) {
+	// run janitor loop forever, sleep for a time between checks
+	for {
+		// diff keys in filesystem and keys in redis
+
+		// get the list of keys in redis
+		rl := redisClient.Keys("*")
+
+		// get a list of all keys on filesystem
+		fl, _ := ioutil.ReadDir(config.Bitnuke.FileStorePath)
+		fs := make([]string, 0)
+		for _, f := range fl {
+			fs = append(fs, f.Name())
+		}
+
+		// get the diff of these two slices
+		// since these are unsorted we will have to use maps
+		m1 := map[string]bool{}
+		for _, x := range rl.Val() {
+			m1[x] = true
+		}
+		m2 := []string{}
+		for _, x := range fs {
+			if _, ok := m1[x]; !ok {
+				m2 = append(m2, x)
+			}
+		}
+
+		// remove file on filesystem that is not in redis
+		for _, cf := range m2 {
+			err := os.Remove(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, cf))
+			if err != nil {
+				glogger.Debug.Println("error removing file from filesystem")
+			} else {
+				glogger.Debug.Printf("removed expired file %s\n", cf)
+			}
+		}
+
+		// sleep for a time between checks
+		time.Sleep(config.Bitnuke.JanitorSleepSeconds * time.Second)
+	}
 }

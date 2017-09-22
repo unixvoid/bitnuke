@@ -1,6 +1,8 @@
 [bitnuke]
   loglevel            = "debug"
   port                = 8808
+  filestorepath       = "/tmp/bitnuke_data"
+  janitorsleepseconds = 5
   tokensize           = 8
   sectokensize        = 32
   deltokensize        = 20

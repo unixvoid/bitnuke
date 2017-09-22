@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"runtime"
@@ -39,22 +40,21 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	}
 
 	// try and pull the data from redis
-	val, err := redisClient.Get(longFileId).Result()
-	encryptedFilename, err := redisClient.HGet(fmt.Sprintf("meta:%s", longFileId), "filename").Result()
+	encryptedFilename, err := redisClient.HGet(longFileId, "filename").Result()
 	if err != nil {
 		// handle the error if the token does not exist
 		glogger.Debug.Printf("data does not exist %s :: from: %s\n", dataId, ip)
 		fmt.Fprintf(w, "token not found")
 	} else {
-		// token exists, try and decrypt
 
-		// serve up the content to the client
 		glogger.Debug.Printf("Responsing to %s :: from: %s\n", dataId, ip)
 
-		// DEBUG
-		//glogger.Debug.Printf("file id:    %s\n", dataId)
-		//glogger.Debug.Printf("secure key: %s\n", secureKey)
-		//glogger.Debug.Printf("val:        %s\n", val)
+		// token exists, try and decrypt
+		val, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId))
+		if err != nil {
+			glogger.Debug.Println("error reading file from filesystem")
+			panic(err.Error())
+		}
 
 		// decrypt
 		plainFile, err := decrypt([]byte(secureKey), []byte(val))

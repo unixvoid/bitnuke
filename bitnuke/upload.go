@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
-	//"strings"
 	"time"
 
 	"github.com/unixvoid/glogger"
@@ -28,18 +28,6 @@ type CValue struct {
 }
 
 func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, state string) {
-	/*
-		    three things happen here. after the fileId, secretKey, and removalKey are generated
-				the following fields are made and uploaded to redis (AFTER encryption).
-
-				note that 4b7fb8096e6413f0d0ac246dfbc11a86<SNIP> is the sha3:512 hashed value of the
-				  key 'c4b08d47a0'.
-				note the contents of these redis keys are encrypted
-
-				4b7fb8096e6413f0d0ac246dfbc11a86<SNIP>       : file contents
-				meta:4b7fb8096e6413f0d0ac246dfbc11a86<SNIP>  : meta for the key (delete key)
-	*/
-
 	// get file POST from index
 	if r.Method == "GET" {
 		crutime := time.Now().Unix()
@@ -60,8 +48,7 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 			return
 		} else {
 			// overwrite default filename with parsed filename
-			rawFilename := fmt.Sprintf("%v", multipartFileHeader.Filename)
-			filename = rawFilename
+			filename = fmt.Sprintf("%v", multipartFileHeader.Filename)
 		}
 		defer file.Close()
 
@@ -85,6 +72,7 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		b, _ := json.Marshal(cVal)
 		base64JsonC := base64.StdEncoding.EncodeToString(b)
 
+		// set cookie expiration
 		expiration := time.Now().Add(24 * time.Hour)
 		cookie := http.Cookie{Name: fileId, Value: base64JsonC, Expires: expiration}
 		http.SetCookie(w, &cookie)
@@ -113,13 +101,13 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 		fileIdHash := sha3.Sum512([]byte(fileId))
 		longFileId := fmt.Sprintf("%x", fileIdHash)
 
-		// set meta:<hash> in redis
-		_, err = redisClient.HMSet(fmt.Sprintf("meta:%s", longFileId), map[string]string{
+		// set hash metadata in redis
+		_, err = redisClient.HMSet(longFileId, map[string]string{
 			"filename":    string(encryptedFilename),
 			"deleteToken": string(encryptedDelToken),
 		}).Result()
 		if err != nil {
-			glogger.Error.Println("error setting meta<hash> key in redis")
+			glogger.Error.Println("error setting meta hash key in redis")
 		}
 
 		// set <hash> (file) in redis
@@ -145,12 +133,20 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 			glogger.Debug.Println("error encrypting file")
 			panic(err.Error())
 		}
-		//fmt.Printf("%0x\n", encryptedFile)
-		redisClient.Set(fmt.Sprintf("%s", longFileId), encryptedFile, 0).Err()
+
+		// store on disk instead of writing to redis
+		//redisClient.Set(fmt.Sprintf("%s", longFileId), encryptedFile, 0).Err()
+
+		// write contents to file
+		err = ioutil.WriteFile(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId), encryptedFile, 0644)
+		if err != nil {
+			glogger.Error.Println("error creating file on filesystem")
+			panic(err.Error())
+		}
 
 		// expire data
 		redisClient.Expire(fmt.Sprintf("%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
-		redisClient.Expire(fmt.Sprintf("meta:%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
+		redisClient.Expire(longFileId, (config.Bitnuke.TTL * time.Hour)).Err()
 		glogger.Debug.Println("expire link generated")
 		os.Remove("tmpfile")
 	}
