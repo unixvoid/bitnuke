@@ -15,22 +15,6 @@ import (
 	"gopkg.in/redis.v5"
 )
 
-//func secTokenGen(tokenHash string, client *redis.Client) string {
-//	// TODO expire this
-//	// generate sec token (25 char string) return to client
-//	// hash this (sha3:512) and store the hash under 'sec:<id> <hashed_sec>'
-//
-//	// first gen the new string to spec
-//	secToken := randStr(config.Bitnuke.SecTokenSize, &config.Bitnuke.SecDictionary)
-//	secTokenHash := sha3.Sum512([]byte(secToken))
-//
-//	// throw hash into redis
-//	client.Set(fmt.Sprintf("sec:%s", tokenHash), fmt.Sprintf("%x", secTokenHash), 0).Err()
-//
-//	// return unhashed string
-//	return secToken
-//}
-
 func tokenGen(strSize int, client *redis.Client) string {
 	// generate new token
 	token := randStr(strSize, &config.Bitnuke.TokenDictionary)
