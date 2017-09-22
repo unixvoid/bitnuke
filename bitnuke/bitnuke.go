@@ -63,12 +63,12 @@ func main() {
 		glogger.Debug.Println("connection to redis succeeded.")
 	}
 
-	// create the filestore dir if it does not exist
-	_, err := os.Stat(config.Bitnuke.FileStorePath)
+	// create the filestore and tmp dir if it does not exist
+	_, err := os.Stat(fmt.Sprintf("%s/.tmp/", config.Bitnuke.FileStorePath))
 	if err != nil {
 		// dir does not exist, create it
-		glogger.Debug.Printf("creating directory: %s\n", config.Bitnuke.FileStorePath)
-		os.Mkdir(config.Bitnuke.FileStorePath, os.ModePerm)
+		glogger.Debug.Printf("creating directory and tmp directory in: %s\n", config.Bitnuke.FileStorePath)
+		os.Mkdir(fmt.Sprintf("%s/.tmp/", config.Bitnuke.FileStorePath), os.ModePerm)
 	}
 
 	// fire up the janitor to monitor expire times
@@ -146,7 +146,10 @@ func janitor(redisClient *redis.Client) {
 		fl, _ := ioutil.ReadDir(config.Bitnuke.FileStorePath)
 		fs := make([]string, 0)
 		for _, f := range fl {
-			fs = append(fs, f.Name())
+			// allow the tmp directory to live
+			if f.Name() != ".tmp" {
+				fs = append(fs, f.Name())
+			}
 		}
 
 		// get the diff of these two slices
