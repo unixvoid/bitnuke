@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/unixvoid/glogger"
@@ -67,14 +68,14 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 
 			if outfile, err = os.Create(fmt.Sprintf("%s/.tmp/%s", config.Bitnuke.FileStorePath, longFileId)); nil != err {
 				w.WriteHeader(http.StatusInternalServerError)
-				glogger.Error.Println("unable to parse multipart form file")
+				glogger.Error.Println("unable to write multipart form file")
 				return
 			}
 			// 32K buffer copy
 			_, err = io.Copy(outfile, infile)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				glogger.Error.Println("unable to write multipart form file")
+				glogger.Error.Println("unable to copy to multipart form file")
 				return
 			} else {
 				// overwrite default filename with parsed filename
@@ -171,4 +172,7 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 	redisClient.Expire(fmt.Sprintf("%s", longFileId), (config.Bitnuke.TTL * time.Hour)).Err()
 	redisClient.Expire(longFileId, (config.Bitnuke.TTL * time.Hour)).Err()
 	glogger.Debug.Println("expire link generated")
+
+	// force garbage collection
+	runtime.GC()
 }

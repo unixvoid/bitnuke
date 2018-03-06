@@ -68,7 +68,7 @@ func main() {
 	if err != nil {
 		// dir does not exist, create it
 		glogger.Debug.Printf("creating directory and tmp directory in: %s\n", config.Bitnuke.FileStorePath)
-		os.Mkdir(fmt.Sprintf("%s/.tmp/", config.Bitnuke.FileStorePath), os.ModePerm)
+		os.MkdirAll(fmt.Sprintf("%s/.tmp/", config.Bitnuke.FileStorePath), os.ModePerm)
 	}
 
 	// fire up the janitor to monitor expire times

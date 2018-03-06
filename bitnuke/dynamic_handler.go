@@ -52,8 +52,10 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		// token exists, try and decrypt
 		val, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId))
 		if err != nil {
+			// the file is either unreadable or not found
 			glogger.Debug.Println("error reading file from filesystem")
-			panic(err.Error())
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 
 		// decrypt
@@ -66,15 +68,9 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		}
 		decodeVal, _ := base64.StdEncoding.DecodeString(string(plainFile))
 
-		// force garbage collection
-		runtime.GC()
-
 		file, _ := os.Create("tmpfile")
 		io.WriteString(file, string(decodeVal))
 		file.Close()
-
-		// force garbage collection
-		runtime.GC()
 
 		// unencrypt filename
 		filename, err := decrypt([]byte(secureKey), []byte(encryptedFilename))
@@ -91,4 +87,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		http.ServeFile(w, r, "tmpfile")
 		os.Remove("tmpfile")
 	}
+
+	// force garbage collection
+	runtime.GC()
 }
