@@ -29,7 +29,7 @@ func remove(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 	longFileId := fmt.Sprintf("%x", sha3.Sum512([]byte(fileId)))
 
 	// make sure token exists
-	encryptedDeleteToken, err := redisClient.HGet(longFileId, "deleteToken").Result()
+	encryptedDeleteToken, err := redisClient.HGet(longFileId, "delete_token").Result()
 	if err != nil {
 		glogger.Debug.Println("token does not exist")
 		w.WriteHeader(http.StatusNotFound)
@@ -53,7 +53,7 @@ func remove(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 		// client is authed to remove data
 		err := os.Remove(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId))
 		if err != nil {
-			glogger.Debug.Println("error removing file form filesystem")
+			glogger.Debug.Println("error removing file from filesystem")
 		}
 		redisClient.Del(longFileId)
 	} else {
