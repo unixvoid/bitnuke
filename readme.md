@@ -1,8 +1,25 @@
-# bitnuke
+# Bitnuke
 [![Build Status (Travis)](https://travis-ci.org/unixvoid/bitnuke.svg?branch=develop)](https://travis-ci.org/unixvoid/bitnuke)  
-bitnuke is a fully volatile data storage solution currently running at https://bitnuke.io  
+Bitnuke is a fully volatile data storage solution currently running at https://bitnuke.io  
 Please note, this repo is soley the API backend.  To bring up the full stack please visit [bitnuke-compose](https://github.com/unixvoid/bitnuke-compose).
 This repo is strictly the API that supports the following REST calls:  
+
+
+## Running Bitnuke
+There are 2 ways to run bitnuke:
+
+1. **From Source**: Redis and Nginx are required to be run before the code can be run.
+Nginx configs can be found in `deps/conf/` and the static files for the frontend are
+in `deps/data/bitnuke/static/`. Once Nginx and redis are up you can use the following
+to build and deploy the code.  
+`make dependencies`  
+`make run`  
+If you want to compile the code use:  
+`make bitnuke`(dynamically compiled) or `make stat`(statically compiled)
+2. **ACI/rkt**: We have public rkt images hosted on the site! check them out
+[here](https://cryo.unixvoid.com/bin/rkt/bitnuke-api/) or go give us a fetch for 64bit machines!
+`rkt fetch unixvoid.com/bitnuke-api:0.20.2`.  This image can be run with rkt or you can
+grab our handy service file at `deps/bitnuke.service`
 
 
 ## API guide
@@ -23,7 +40,7 @@ specification for the exposed enpoints and their protocols.
   - example: `curl -d link=https://google.com https://bitnuke.io/compress`
 
 
-shorthand  
+###Shorthand  
 ```
 /upload                 ::  takes a POST of multipart data to be stored. returns a token and security token (as header)
 /remove                 ::  takes a POST of url-encoded `token`(token) and `sec`(security token)
@@ -36,17 +53,17 @@ shorthand
 ## Storage
 Bitnuke  does the following when recieving data.  
 
-Generates a `file_id`: the sha3:512 hash of a randomly generated 8 digit alpha numeric string (the
+- Generates a `file_id`: the sha3:512 hash of a randomly generated 8 digit alpha numeric string (the
   key gets stored on disk with this name)  
-Generates a `sec_key`: a 32 character randomly generated alpha numeric string for encryption  
-Generates a `removal_key`: a 20 character randomly generated alpha numeric string to be used as a removal auth  
-Base64 encodes the file contents and then uses AES 256 encryption algorithm to encrypt the contents  
-Adds a redis hash key with the `file_id` as the name and contents are the AES 256 encrypted `sec_key` and `removal_key`
+- Generates a `sec_key`: a 32 character randomly generated alpha numeric string for encryption  
+- Generates a `removal_key`: a 20 character randomly generated alpha numeric string to be used as a removal auth  
+- Base64 encodes the file contents and then uses AES 256 encryption algorithm to encrypt the contents  
+- Adds a redis hash key with the `file_id` as the name and contents are the AES 256 encrypted `sec_key` and `removal_key`
 
 
-### License
+## License
 Bitnuke is distributed under the **MIT license**.  See LICENSE in the root of the project for details. 
 
 
-### Contributions
+## Contributions
 - Shoutout to [JenksMedia](https://github.com/JenksMedia) for the custom background
