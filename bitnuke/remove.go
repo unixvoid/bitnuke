@@ -54,6 +54,8 @@ func remove(w http.ResponseWriter, r *http.Request, redisClient *redis.Client) {
 		err := os.Remove(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId))
 		if err != nil {
 			glogger.Debug.Println("error removing file from filesystem")
+		} else {
+			glogger.Debug.Printf("removing %s filesystem\n", longFileId)
 		}
 		redisClient.Del(longFileId)
 	} else {
