@@ -32,15 +32,6 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 	// set default filename
 	filename := "unnamed_file"
 
-	//////  file, multipartFileHeader, err := r.FormFile("file")
-	//////  if err != nil {
-	//////  	glogger.Error.Println(err)
-	//////  	return
-	//////  } else {
-	//////  	// overwrite default filename with parsed filename
-	//////  	filename = fmt.Sprintf("%v", multipartFileHeader.Filename)
-	//////  }
-	//////  defer file.Close()
 	var fileId string
 	var longFileId string
 
@@ -111,10 +102,6 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 	// return file_id and sec_key to client
 	fmt.Fprintf(w, "%s/%s", fileId, secToken)
 
-	//glogger.Debug.Println("file id:       ", fileId)
-	//glogger.Debug.Println("secret key:    ", secToken)
-	//glogger.Debug.Println("delete token:  ", delToken)
-
 	// encrypt fileId
 	encryptedFilename, err := encrypt([]byte(secToken), []byte(filename))
 	if err != nil {
@@ -130,8 +117,8 @@ func upload(w http.ResponseWriter, r *http.Request, redisClient *redis.Client, s
 
 	// set hash metadata in redis
 	_, err = redisClient.HMSet(longFileId, map[string]string{
-		"filename":    string(encryptedFilename),
-		"deleteToken": string(encryptedDelToken),
+		"filename":     string(encryptedFilename),
+		"delete_token": string(encryptedDelToken),
 	}).Result()
 	if err != nil {
 		glogger.Error.Println("error setting meta hash key in redis")
