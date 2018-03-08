@@ -1,0 +1,17 @@
+[bitnuke]
+  loglevel            = "debug"
+  port                = 8808
+  filestorepath       = "/tmp/bitnuke_data"
+  janitorsleepseconds = 5
+  tokensize           = 8
+  sectokensize        = 32
+  deltokensize        = 20
+  linktokensize       = 4
+  ttl                 = 24
+  tokendictionary     = "0123456789abcdefghijklmnopqrstuvwxyz"
+  secdictionary       = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
+  bootstrapdelay      = 1
+
+[redis]
+  host                = "localhost:6379"
+  password            = ""

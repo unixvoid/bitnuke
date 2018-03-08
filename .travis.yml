@@ -2,26 +2,29 @@ language: go
 sudo: required
 
 go:
-  - 1.6
   - 1.7
 
 services:
-  - docker
+  - redis
 
 install:
-  # pull required dependencies
   - make dependencies
 
 script:
-  # statically compile
   - make stat
 
 after_success:
-  # clean, build, push to docker
-  - make clean
-  - make fulldocker
-  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - docker push unixvoid/bitnuke
-  # push binaries to binder
-  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form path=bitnuke/ https://cryo.unixvoid.com/upload
-  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form filename=bitnuke-latest-linux-amd64 --form path=bitnuke/ https://cryo.unixvoid.com/upload
+  # upload binary to binder
+  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form path=bitnuke/v0.20.2/ https://cryo.unixvoid.com/upload
+  - curl -i --form sec=$BINDER_SEC --form file=@`ls bin/bitnuke*` --form filename=bitnuke-latest-linux-amd64 --form path=bitnuke/v0.20.2/ https://cryo.unixvoid.com/upload
+  # pull unixvoid gpg keys
+  - curl -d sec=$BINDER_SEC -d key=unixvoid.pub https://cryo.unixvoid.com/getfile --output unixvoid.pub
+  - curl -d sec=$BINDER_SEC -d key=unixvoid.sec https://cryo.unixvoid.com/getfile --output unixvoid.sec
+  # sign build and sign aci
+  - make clean build_travis_aci
+  - mv bitnuke-api.aci bitnuke-api-0.20.2-linux-amd64.aci
+  - cp deps/sign.sh . && chmod +x sign.sh
+  - ./sign.sh $GPG_SEC
+  # upload bitnuke aci image
+  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-api-0.20.2-linux-amd64.aci --form path=rkt/bitnuke-api/ https://cryo.unixvoid.com/upload
+  - curl -i --form sec=$BINDER_SEC --form file=@bitnuke-api-0.20.2-linux-amd64.aci.asc --form path=rkt/bitnuke-api/ https://cryo.unixvoid.com/upload

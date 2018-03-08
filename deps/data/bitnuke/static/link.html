@@ -6,42 +6,39 @@
     <link rel="stylesheet" href="static/style.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
   </head>
-  <div class=tint>
-    <body class=bg>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-
-    <!--<form id="link" action="/compress" method="post" class="linkstyle" onsubmit="linkreturn()">-->
-    <center></br></br><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></br></br></br></br></center>
-    <center>
-    <form id="link" class="linkstyle">
-      <input type="text" placeholder=" :link" name="link">
-      <!--<input type="submit" value="submit">-->
-    </form></br>
-    <div id=writezone></div>
-    </center>
-    <script>
-    $('#link').submit(function () {
-      $.post('/compress', $('#link').serialize(), function (data) {
-        $('#writezone').append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
-            //console.log($('#link').serialize());
-        //console.log(data);
+  <body class=bg>
+    <div class=tint>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+      <center></br></br><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></br></br></br></br></center>
+      <center>
+      <form id="link" class="linkstyle">
+        <input type="text" placeholder=" :link" name="link">
+        <!--<input type="submit" value="submit">-->
+      </form></br>
+      <div id=writezone></div>
+      </center>
+      <script>
+      $('#link').submit(function () {
+        $.post('/compress', $('#link').serialize(), function (data) {
+          $('#writezone').append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
+          //console.log(data);
+        });
+        return false;
       });
-      return false;
-    });
-    console.log("bitnuke.io")
-    console.log("see you in 12 hours...")
-    </script>
+      console.log("bitnuke.io")
+      console.log("see you in 12 hours...")
+      </script>
       <div class=footer>
         <center>
             <div class=leftfoot>
               Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a>
-              <a class=flink href="https://github.com/unixvoid/bitnuke">//v0.10.4</a>
+              <a class=flink href="https://github.com/unixvoid/bitnuke">//v0.20.2</a>
             </div>
             <div class=rightfoot>
               <a class=flink href="/">//bitnuke.io</a>
             </div>
         </center>
       </div>
-    </body>
-  </div>
+    </div>
+  </body>
 <html>

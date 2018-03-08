@@ -11,10 +11,13 @@ body {
   font-family: 'Open Sans', sans-serif;
   color: #3f3f3f;
   padding-top: 3%;
+  background-image: url("bitnuke_background.png");
+  background-size: cover;
+  height: 100vh;
 }
 
 .bg {
-  background-color: #5056b0;
+  background-color: #484547;
   background-repeat: no-repeat;
 }
 
@@ -25,7 +28,7 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  background: linear-gradient( rgba(0,0,0,0.15), rgba(0,0,0,.3) 80% );
+  background: linear-gradient( rgba(0, 0, 0, 0.15), rgba(0,0,0,.3) 80% );
 }
 
 .dropmsg {
@@ -33,13 +36,13 @@ body {
 }
 
 #droppy {
-  background: rgba(0, 0, 0, .16);
-  border: 2px dashed rgba(128, 128, 128, 0.8) !important;
+  background: rgba(0, 0, 0, .4);
+  border: 2px solid rgba(128, 128, 128, 1) !important;
 }
 
 .dropzone:hover {
-  background: rgba(0, 0, 0, .3) !important;
-  transition: all 0.6s ease !important;
+  background: rgba(0, 0, 0, .65) !important;
+  transition: all 0.7s ease !important;
   opacity: 3 !important;
   cursor: pointer !important;
 }
@@ -64,7 +67,7 @@ h1 span {
   bottom: 0;
   left: 0;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, .2) !important;
+  background-color: rgba(0, 0, 0, .6) !important;
   text-align: center;
 }
 
@@ -164,16 +167,55 @@ h1 span {
   opacity: 1;
 }
 
+#pre_logo {
+  padding-top: 125px;
+}
+
 #logo {
-  padding: 40px;
+}
+
+#post_logo {
+  padding-top: 50px;
 }
 
 #writezone {
   color: #3f3f3f;
 }
 
-#writezone a {
+#writezone2 {
   color: gray;
+  text-decoration: none;
+  font-weight: normal;
+}
+
+#writezone2 table {
+  border-collapse: collapse;
+  border-spacing: 5px;
+  padding: 15px;
+  text-align: left;
+}
+
+#min_width {
+  min-width: 300px;
+}
+
+#removal {
+  text-align: center;
+}
+
+#writezone2 th {
+  color: #9c9c9c;
+  padding: 6px 15px 6px 15px;
+  background-color: rgba(0, 0, 0, .4) !important;
+}
+
+#writezone2 td {
+  padding: 2px 15px 2px 15px;
+}
+
+#writezone2 a,
+#writezone a {
+  color: #9c9c9c;
   text-decoration: none;
   font-weight: normal;
 }
@@ -250,7 +292,7 @@ h1 span {
   background: rgba(0, 0, 0, .16);
   padding: 10px;
   width: 325px;
-  border: 2px solid rgba(128, 128, 128, 0.8);
+  border: 2px solid rgba(128, 128, 128, 1);
   border-radius: 5px;
   color: gray;
   transition: all 0.6s ease;
