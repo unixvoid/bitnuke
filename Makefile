@@ -2,6 +2,7 @@ GOC=go build
 GOFLAGS=-a -ldflags '-s'
 CGOR=CGO_ENABLED=0
 OS_PERMS=sudo
+CWD=$(shell pwd)
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
 
 all: bitnuke
@@ -50,6 +51,27 @@ build_travis_aci: prep_aci
 		mv bitnuke-api.aci ../
 	rm -rf appc-v0.8.7*
 	@echo "bitnuke-api.aci built"
+
+test: clean build_aci
+	mkdir -p /tmp/redis
+	$(OS_PERMS) rkt run \
+		--port=web-http:8080 \
+		--volume redis-data,kind=host,source=/tmp/redis \
+		--volume nginx-data,kind=host,source=$(CWD)/deps/data/ \
+		--volume nginx-conf,kind=host,source=$(CWD)/deps/conf/nginx.conf \
+		--volume nginx-log,kind=host,source=/tmp/nginx/log \
+		--volume nginx-mime,kind=host,source=$(CWD)/deps/conf/mime.types \
+		unixvoid.com/redis \
+			--mount volume=redis-data,target=/redisbak \
+		unixvoid.com/nginx-1.13.11 \
+			--mount volume=nginx-data,target=/data \
+			--mount volume=nginx-conf,target=/nginx/nginx.conf \
+			--mount volume=nginx-mime,target=/conf/mime.types \
+			--mount volume=nginx-log,target=/nginx/log/ \
+		./bitnuke-api.aci \
+			--insecure-options=image
+
+
 
 stat:
 	mkdir -p bin/
