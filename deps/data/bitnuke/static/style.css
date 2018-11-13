@@ -6,8 +6,8 @@
   box-sizing: border-box;
 }
 
+/*
 body {
-  /*font-family: "Courier New", Courier, monospace;*/
   font-family: 'Open Sans', sans-serif;
   color: #3f3f3f;
   padding-top: 3%;
@@ -15,9 +15,16 @@ body {
   background-size: cover;
   height: 100vh;
 }
+*/
+
+body {
+  /*font-family: "Courier New", Courier, monospace;*/
+  font-family: 'Open Sans', sans-serif;
+  color: #3f3f3f;
+}
 
 .bg {
-  background-color: #484547;
+  background-color: #7777dd;
   background-repeat: no-repeat;
 }
 
@@ -32,17 +39,17 @@ body {
 }
 
 .dropmsg {
-  color: rgba(128, 128, 128, 0.8);
+  color: rgba(32, 32, 32, 1);
 }
 
 #droppy {
-  background: rgba(0, 0, 0, .4);
-  border: 2px solid rgba(128, 128, 128, 1) !important;
+  background: rgba(0, 0, 0, .2);
+  border: 2px solid rgba(32, 32, 32, 1) !important;
 }
 
 .dropzone:hover {
-  background: rgba(0, 0, 0, .65) !important;
-  transition: all 0.7s ease !important;
+  background: rgba(0, 0, 0, .25) !important;
+  transition: all 0.12s ease !important;
   opacity: 3 !important;
   cursor: pointer !important;
 }
@@ -58,6 +65,7 @@ h1 span {
   padding-left: 4px;
 }
 
+/*
 .footer {
   color: gray;
   font-size: 12px;
@@ -70,17 +78,47 @@ h1 span {
   background-color: rgba(0, 0, 0, .6) !important;
   text-align: center;
 }
+*/
+
+.footer {
+  color: rgba(32, 32, 32, 1);
+  font-size: 12px;
+	/*border-top: 1px solid rgba(63, 63, 63, 0.19);*/
+	right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  /*background-color: rgba(0, 0, 0, .6) !important;*/
+  text-align: center;
+}
+
+.ulink {
+  text-decoration: none;
+  color: rgba(32, 32, 32, 1);
+  font-weight: bold;
+}
 
 .flink {
   text-decoration: none;
-  font-weight: normal;
-  color: gray;
-  padding-right: 8px;
+  color: rgba(32, 32, 32, 1);
+  padding-right: 10px;
+  padding-left: 10px;
+  font-weight: bold;
 }
 
 .flink:hover {
-  transition: all 0.6s ease;
-  color: #666666;
+  transition: all 0.2s ease;
+  color: rgba(58, 58, 58, 1);
+}
+
+.ulink:hover {
+  transition: all 0.2s ease;
+  color: rgba(58, 58, 58, 1);
+}
+
+.msg {
+  color: rgba(32, 32, 32, 1);
+  font-size: 110%;
 }
 
 .blink {
@@ -96,18 +134,8 @@ h1 span {
 }
 
 .blink:hover {
-  transition: all 0.6s ease;
-  color: #666666;
-}
-
-.leftfoot {
-	float: left;
-	padding-left: 2%;
-}
-
-.rightfoot {
-	float: right;
-	padding-right: 2%;
+  transition: all 0.2s ease;
+  color: rgba(58, 58, 58, 1);
 }
 
 .button {
@@ -175,7 +203,7 @@ h1 span {
 }
 
 #post_logo {
-  padding-top: 50px;
+  padding-top: 25px;
 }
 
 #writezone {
@@ -289,12 +317,12 @@ h1 span {
 }
 
 .linkstyle input[type="text"] {
-  background: rgba(0, 0, 0, .16);
   padding: 10px;
   width: 325px;
-  border: 2px solid rgba(128, 128, 128, 1);
+  background: rgba(0, 0, 0, .2);
+  border: 2px solid rgba(32, 32, 32, 1) !important;
   border-radius: 5px;
-  color: gray;
+  color: rgba(32, 32, 32, 1);
   transition: all 0.6s ease;
 }
 

@@ -5,6 +5,7 @@
     <title>bitnuke</title>
     <link rel="shortcut icon" type="image/png" href="static/favicon.png">
     <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
   </head>
 
@@ -15,6 +16,18 @@
 
       <div id=pre_logo></div>
       <center><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></center>
+      <div id=post_logo></div>
+
+      <center>
+        <div>
+          <p class=msg>
+            bitnuke.io is an anonymous temporary file storage site.
+          </p>
+          <p class=msg>
+            Your files are stored for 24 hours and then deleted permanently.
+          </p>
+        </div></br>
+      </center>
       <div id=post_logo></div>
 
       <center>
@@ -87,23 +100,16 @@
       </script>
       <div class=footer>
         <center>
-            <div class=leftfoot>
-              Volatile file storage powered by <a class=flink href="https://unixvoid.com">unixvoid.com</a>
-              <a class=flink href="https://github.com/unixvoid/bitnuke">//v0.20.2</a>
+            <div>
+              Volatile file storage powered by <a class=ulink href="https://unixvoid.com">unixvoid.com</a>
             </div>
-            <div class=rightfoot>
-              <a class=flink href="/link">//link_shortener</a>
-              <a class=flink class=button href="#about">//about</a>
+            <div>
+              <a class=flink href="https://github.com/unixvoid/bitnuke">v0.20.2
+                <i class="fa fa-github"></i>
+              </a>
+              <a class=flink href="/link">link_shortener</a>
             </div>
         </center>
-      </div>
-      <div id=about class=overlay>
-        <div class="popup">
-          <a class="close" href="#">x</a>
-          <div class=popupcontent>
-            bitnuke.io is an anonymous temporary file storage site. Your files are stored for 24 hours and then deleted permanently.
-          </div>
-        </div>
       </div>
     </div>
   </body>
