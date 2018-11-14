@@ -111,6 +111,22 @@ h1 span {
   color: rgba(58, 58, 58, 1);
 }
 
+.hlink {
+  text-decoration: none;
+  color: rgba(32, 32, 32, 1);
+  padding-right: 10px;
+  padding-left: 10px;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+}
+
+.hlink:hover {
+  transition: all 0.2s ease;
+  color: rgba(58, 58, 58, 1);
+}
+
 .ulink:hover {
   transition: all 0.2s ease;
   color: rgba(58, 58, 58, 1);
