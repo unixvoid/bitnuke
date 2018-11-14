@@ -41,7 +41,7 @@
       <script>
       $('#link').submit(function () {
         $.post('/compress', $('#link').serialize(), function (data) {
-          $('#writezone')empty().append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
+          $('#writezone').empty().append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
           //console.log(data);
         });
         return false;
