@@ -54,6 +54,7 @@ build_travis_aci: prep_aci
 
 test: clean build_aci
 	mkdir -p /tmp/redis
+	mkdir -p /tmp/nginx/log
 	$(OS_PERMS) rkt run \
 		--port=web-http:8080 \
 		--volume redis-data,kind=host,source=/tmp/redis \
