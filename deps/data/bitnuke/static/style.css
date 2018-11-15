@@ -219,7 +219,7 @@ h1 span {
 }
 
 #writezone2 th {
-  color: #9c9c9c;
+  color: rgba(32, 32, 32, 1);
   padding: 6px 15px 6px 15px;
   background-color: rgba(0, 0, 0, .4) !important;
 }
@@ -230,7 +230,7 @@ h1 span {
 
 #writezone2 a,
 #writezone a {
-  color: #9c9c9c;
+  color: rgba(32, 32, 32, 1);
   text-decoration: none;
   font-weight: normal;
 }
