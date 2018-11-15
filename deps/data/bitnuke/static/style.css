@@ -6,17 +6,6 @@
   box-sizing: border-box;
 }
 
-/*
-body {
-  font-family: 'Open Sans', sans-serif;
-  color: #3f3f3f;
-  padding-top: 3%;
-  background-image: url("bitnuke_background.png");
-  background-size: cover;
-  height: 100vh;
-}
-*/
-
 body {
   /*font-family: "Courier New", Courier, monospace;*/
   font-family: 'Open Sans', sans-serif;
@@ -64,30 +53,13 @@ h1 span {
   padding-left: 4px;
 }
 
-/*
-.footer {
-  color: gray;
-  font-size: 12px;
-	border-top: 1px solid rgba(63, 63, 63, 0.19);
-  position: absolute;
-	right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 1rem;
-  background-color: rgba(0, 0, 0, .6) !important;
-  text-align: center;
-}
-*/
-
 .footer {
   color: rgba(32, 32, 32, 1);
   font-size: 12px;
-	/*border-top: 1px solid rgba(63, 63, 63, 0.19);*/
 	right: 0;
   bottom: 0;
   left: 0;
   padding: 1rem;
-  /*background-color: rgba(0, 0, 0, .6) !important;*/
   text-align: center;
 }
 
