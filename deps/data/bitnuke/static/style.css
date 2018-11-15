@@ -24,8 +24,8 @@ body {
 }
 
 .bg {
-  background-color: #7777dd;
-  background-repeat: no-repeat;
+  /*background-color: #8282FF;*/
+  background: #44B4D5;
 }
 
 .tint {
@@ -35,7 +35,6 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  background: linear-gradient( rgba(0, 0, 0, 0.15), rgba(0,0,0,.3) 80% );
 }
 
 .dropmsg {
