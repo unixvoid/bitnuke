@@ -331,6 +331,10 @@ h1 span {
   background-color: #35027F;
 }
 
+input::placeholder {
+  color: rgba(32, 32, 32, .8);
+}
+
 .linkstyle input[type="text"] {
   padding: 10px;
   width: 325px;
