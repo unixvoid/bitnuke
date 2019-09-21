@@ -2,3 +2,4 @@ bin/
 stage.tmp/
 deps/bitnuke
 *.aci
+*.swp
