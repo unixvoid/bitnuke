@@ -81,7 +81,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 
 		// dont add the filename header to links
 		if string(filename) != "bitnuke:link" {
-			finalFname := fmt.Sprintf("attachment; filename=%s", filename)
+			finalFname := fmt.Sprintf("INLINE; filename=%s", filename)
 			w.Header().Set("Content-Disposition", finalFname)
 		}
 		http.ServeFile(w, r, "tmpfile")
