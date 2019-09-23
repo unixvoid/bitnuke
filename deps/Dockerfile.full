@@ -1,0 +1,15 @@
+FROM alpine
+
+# pull outside resources
+COPY bitnuke /bin/bitnuke
+COPY nginx /bin/nginx
+COPY redis-server /bin/redis-server
+COPY config.gcfg /
+COPY redis.conf /
+COPY run_all.sh /run_all.sh
+
+# stage directories
+RUN mkdir -p /nginx/log/
+RUN mkdir -p /redisbackup/
+
+CMD ["/run_all.sh"]

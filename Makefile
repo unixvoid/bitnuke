@@ -4,6 +4,9 @@ CGOR=CGO_ENABLED=0
 OS_PERMS=sudo
 CWD=$(shell pwd)
 GIT_HASH=$(shell git rev-parse HEAD | head -c 10)
+NGINX_BIN_LOC=https://cryo.unixvoid.com/bin/nginx/nginx-1.11.10-linux-amd64
+REDIS_BIN_LOC=https://cryo.unixvoid.com/bin/redis/3.2.6/redis-server
+FULL_DOCKER_NAME=bitnuke:full
 
 all: bitnuke
 
@@ -72,6 +75,30 @@ test: clean build_aci
 		./bitnuke-api.aci \
 			--insecure-options=image
 
+build-full: clean stat
+	rm -rf stage.tmp/
+	mkdir -p stage.tmp/
+	cp deps/Dockerfile.full stage.tmp/Dockerfile
+	cp bin/bitnuke* stage.tmp/bitnuke
+	cp config.gcfg stage.tmp/
+	cp deps/redis.conf stage.tmp/
+	cp deps/run_all.sh stage.tmp/
+	cd stage.tmp/ && \
+		wget -O nginx $(NGINX_BIN_LOC) && \
+		chmod +x nginx && \
+		wget -O redis-server $(REDIS_BIN_LOC) && \
+		chmod +x redis-server && \
+		$(OS_PERMS) docker build -t $(FULL_DOCKER_NAME) .
+
+run-full:
+	$(OS_PERMS) docker run \
+		-it \
+		--name bitnuke-full \
+		-v $(CWD)/deps/conf/nginx.conf:/nginx/nginx.conf \
+		-v $(CWD)/deps/conf/mime.types:/conf/mime.types \
+		-v $(CWD)/deps/data/:/data \
+		-p 8080:80 \
+		$(FULL_DOCKER_NAME)
 
 
 stat:

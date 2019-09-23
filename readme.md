@@ -6,7 +6,7 @@ This repo is strictly the API that supports the following REST calls:
 
 
 ## Running Bitnuke
-There are 2 ways to run bitnuke:
+There are 3 ways to run bitnuke:
 
 1. **From Source**: Redis and Nginx are required to be run before the code can be run.
 Nginx configs can be found in `deps/conf/` and the static files for the frontend are
@@ -20,7 +20,10 @@ If you want to compile the code use:
 [here](https://cryo.unixvoid.com/bin/rkt/bitnuke-api/) or go give us a fetch for 64bit machines!
 `rkt fetch unixvoid.com/bitnuke-api:0.20.2`.  This image can be run with rkt or you can
 grab our handy service file at `deps/bitnuke.service`
-
+3. **Docker-compose**: If you want to run the full docker stack (complete with ui and
+redis) you can build the images and then run from the current directory.  
+`make build-full`  
+`make run-full`  
 
 ## API guide
 Bitnuke uses an API for all actions that take place on the site, the following is the
