@@ -1,5 +1,4 @@
 # Bitnuke
-[![Build Status (Travis)](https://travis-ci.org/unixvoid/bitnuke.svg?branch=develop)](https://travis-ci.org/unixvoid/bitnuke)  
 Bitnuke is a fully volatile data storage solution currently running at https://bitnuke.io  
 Please note, this repo is soley the API backend.  To bring up the full stack please visit [bitnuke-compose](https://github.com/unixvoid/bitnuke-compose).
 This repo is strictly the API that supports the following REST calls:  
@@ -16,10 +15,10 @@ to build and deploy the code.
 `make run`  
 If you want to compile the code use:  
 `make bitnuke`(dynamically compiled) or `make stat`(statically compiled)
-2. **ACI/rkt**: We have public rkt images hosted on the site! check them out
+2. ~~**ACI/rkt**: We have public rkt images hosted on the site! check them out
 [here](https://cryo.unixvoid.com/bin/rkt/bitnuke-api/) or go give us a fetch for 64bit machines!
 `rkt fetch unixvoid.com/bitnuke-api:0.20.2`.  This image can be run with rkt or you can
-grab our handy service file at `deps/bitnuke.service`
+grab our handy service file at `deps/bitnuke.service`~~
 3. **Docker-compose**: If you want to run the full docker stack (complete with ui and
 redis) you can build the images and then run from the current directory.  
 `make build-full`  
