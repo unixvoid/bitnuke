@@ -39,6 +39,12 @@ run-stack:
 	cd deps/ && \
 		$(OS_PERMS) docker-compose up -d && \
 		$(OS_PERMS) docker-compose logs -f
+restart-stack:
+	cd deps/ && \
+		$(OS_PERMS) docker-compose down && \
+		$(OS_PERMS) docker rm `sudo docker ps -aq` 2> /dev/null && \
+		$(OS_PERMS) docker-compose up -d && \
+		$(OS_PERMS) docker-compose logs -f
 
 stat:
 	mkdir -p bin/
