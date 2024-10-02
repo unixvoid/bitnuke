@@ -47,6 +47,7 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	//page := fmt.Sprintf("<html><head><meta http-equiv=\"refresh\" content=\"0;URL=%s\"></head></html>", r.PostFormValue("link"))
 	glogger.Debug.Println("creating link")
 	content64Str := base64.StdEncoding.EncodeToString([]byte(r.PostFormValue("link")))
+	glogger.Debug.Println(fmt.Sprintf("DELETE ME: parsed 'link' header: %s", content64Str))
 
 	// generate token and hash it to store in db
 	token := tokenGen(config.Bitnuke.LinkTokenSize, redisClient)

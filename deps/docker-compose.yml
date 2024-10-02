@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  nginx:
+    image: unixvoid/nginx:1.19.6
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/nginx/conf/nginx.conf:ro
+      - ./nginx/mime.types:/nginx/conf/mime.types:ro
+      - ./nginx/data:/nginx/data:ro
+    ports:
+      - "8808:80"
+    network_mode: "bridge"
+    links:
+      - bitnuke
+  redis:
+    image: redis:6.0.9-alpine
+    restart: always
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./redis/:/redisbackup/:rw
+    user: "1000:1000"
+    expose:
+      - "6397"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    network_mode: "bridge"
+  bitnuke:
+    image: unixvoid/bitnuke
+    restart: always
+    depends_on:
+      - redis
+    volumes:
+      - ../config.gcfg:/config.gcfg:ro
+      - ../data/:/tmp/bitnuke_data/:rw
+    expose:
+      - "8808"
+    network_mode: "bridge"
+    links:
+      - redis

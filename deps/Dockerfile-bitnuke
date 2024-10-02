@@ -1,0 +1,6 @@
+FROM alpine
+
+# pull outside resources
+COPY bitnuke /
+
+CMD ["/bitnuke"]

@@ -1,4 +1,5 @@
 bin/
+data/
 stage.tmp/
 deps/bitnuke
 *.aci
