@@ -1,7 +1,5 @@
 bin/
-data/
+./data/
 stage.tmp/
 deps/redis/
-deps/bitnuke
-*.aci
 *.swp
