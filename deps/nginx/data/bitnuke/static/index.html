@@ -127,7 +127,13 @@
           })
 
           // reload the page/update table
-          location.reload();
+          //location.reload();
+          .finally(() => {
+              setTimeout(() => {
+                  location.reload();
+              }, 500); // Allow a slight delay for the server to process
+          });
+
         };
 
         function checkCookies() {
