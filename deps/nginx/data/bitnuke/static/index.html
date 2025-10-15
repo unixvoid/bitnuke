@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
   </head>
 
@@ -118,7 +119,7 @@
         
                 // Convert the updated object back to JSON string
                 let updatedCookieValue = JSON.stringify(cookieObj);
-                console.log("updatedCookieValue: " + updatedCookieValue)
+                //console.log("updatedCookieValue: " + updatedCookieValue)
         
                 // Encode the updated string back to Base64
                 let encodedValue = btoa(updatedCookieValue);
@@ -169,12 +170,47 @@
 
         };
 
+        // Function to copy text to clipboard
+        function copyToClipboard(text, button) {
+          navigator.clipboard.writeText(text).then(function() {
+            // Visual feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }).catch(function(err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          });
+        }
+
+        // Function to format file size
+        function formatFileSize(bytes) {
+          if (bytes === 0) return 'Unknown size';
+          const k = 1024;
+          const sizes = ['bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
         function checkCookies() {
           // Clean up old cookies first
           cleanupOldCookies();
           
-          // initiate data table
-          var targetTable = "<table><tr><th id=min_width>Link</th><th>Shorten</th><th>Delete</th></tr>";
+          // initiate card-based layout
+          var cardContainer = "<div class='cards-container'>";
           var allCookies = document.cookie.split(';');
           if (allCookies != "") {
             for (var i = 0 ; i < allCookies.length; i++) {
@@ -190,16 +226,63 @@
 
                   // Only process cookies that have our expected structure (file info)
                   if (value.sec_key && value.removal_key && value.file_name) {
-                    // build table with data
-                    // if cookie contains "compressed" key, make the href link the shortened val.
-                    console.log(value)
-                    if ("compressed" in value) {
-                      targetTable += '<tr><td><a id='+value.file_name+' href='+value.compressed+'>'+value.file_name+'</a></td>';
+                    //console.log(value)
+                    
+                    // Prepare links
+                    var originalLink = window.location.protocol + "//" + window.location.hostname + "/" + name + "/" + value.sec_key;
+                    var hasShortLink = "compressed" in value;
+                    var shortLink = hasShortLink ? value.compressed : '';
+                    var primaryLink = hasShortLink ? shortLink : originalLink;
+                    
+                    // Build file card
+                    cardContainer += '<div class="file-card">';
+                    
+                    // Card header with file name and delete button
+                    cardContainer += '<div class="card-header">';
+                    cardContainer += '<div class="file-info">';
+                    cardContainer += '<i class="material-icons file-icon">description</i>';
+                    cardContainer += '<div class="file-details">';
+                    cardContainer += '<h3 class="file-name"><a href="' + primaryLink + '" target="_blank">' + value.file_name + '</a></h3>';
+                    
+                    // Show file size if available, otherwise show "Unknown size"
+                    var fileSize;
+                    if (value.file_size !== undefined && value.file_size !== null && value.file_size !== 0) {
+                      fileSize = formatFileSize(value.file_size);
                     } else {
-                      targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+                      fileSize = 'Unknown size';
                     }
-                    targetTable += '<td id=removal><a href="#" onclick="shortenLink(\''+name+'\',\''+value.sec_key+'\');">🗙 </a</td>';
-                    targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
+                    cardContainer += '<span class="file-status">' + fileSize + '</span>';
+                    cardContainer += '</div>';
+                    cardContainer += '</div>';
+                    cardContainer += '<button class="delete-btn-card" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key + '\');" title="Delete File">';
+                    cardContainer += '<i class="material-icons">delete</i>';
+                    cardContainer += '</button>';
+                    cardContainer += '</div>';
+                    
+                    // Card body with action buttons
+                    cardContainer += '<div class="card-body">';
+                    
+                    // Primary copy button
+                    cardContainer += '<button class="card-btn primary-btn" onclick="copyToClipboard(\'' + primaryLink + '\', this)">';
+                    cardContainer += '<i class="material-icons">content_copy</i>';
+                    cardContainer += '<span>Copy Link</span>';
+                    cardContainer += '</button>';
+                    
+                    // Secondary button (shorten or copy short)
+                    if (hasShortLink) {
+                      cardContainer += '<button class="card-btn secondary-btn" onclick="copyToClipboard(\'' + shortLink + '\', this)">';
+                      cardContainer += '<i class="material-icons">content_copy</i>';
+                      cardContainer += '<span>Copy Short</span>';
+                      cardContainer += '</button>';
+                    } else {
+                      cardContainer += '<button class="card-btn secondary-btn" onclick="shortenLink(\'' + name + '\',\'' + value.sec_key + '\');">';
+                      cardContainer += '<i class="material-icons">link</i>';
+                      cardContainer += '<span>Shorten URL</span>';
+                      cardContainer += '</button>';
+                    }
+                    
+                    cardContainer += '</div>';
+                    cardContainer += '</div>';
                   }
                 } catch (e) {
                   // Skip cookies that can't be parsed (not our format)
@@ -207,8 +290,8 @@
                 }
               }
             }
-            targetTable += '</table>';
-            document.getElementById("writezone2").innerHTML = targetTable;
+            cardContainer += '</div>';
+            document.getElementById("writezone2").innerHTML = cardContainer;
           }
         }
 
@@ -221,8 +304,7 @@
               this.removeAllFiles();
               document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
               
-              // Add timestamp to newly created cookies for cleanup tracking
-              // The response should contain the file_id, we need to update the cookie to include timestamp
+              // Add timestamp and file size to newly created cookies
               setTimeout(() => {
                 // Get all cookies and find the one that was just created
                 const allCookies = document.cookie.split(';');
@@ -236,9 +318,11 @@
                       const decodedString = atob(tmpCookie[1]);
                       const cookieObj = JSON.parse(decodedString);
                       
-                      // If this cookie doesn't have a timestamp yet, add one
+                      // If this cookie doesn't have a timestamp yet, add timestamp and file size
                       if (cookieObj.sec_key && cookieObj.removal_key && !cookieObj.timestamp) {
                         cookieObj.timestamp = new Date().getTime();
+                        cookieObj.file_size = file.size; // Add the actual file size from dropzone
+                        
                         const updatedCookieValue = JSON.stringify(cookieObj);
                         const encodedValue = btoa(updatedCookieValue);
                         
@@ -253,9 +337,10 @@
                     }
                   }
                 }
+                
+                // Refresh the display after cookie update is complete
+                checkCookies();
               }, 100); // Small delay to ensure cookie is set
-              
-              checkCookies();
             });
           }
         };
@@ -269,6 +354,22 @@
             cleanupOldCookies();
             checkCookies(); // Refresh the display after cleanup
         }, 30 * 60 * 1000); // 30 minutes
+
+        // Auto-enable snow during November and December
+        function enableSeasonalSnow() {
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth(); // 0 = January, 10 = November, 11 = December
+            
+            // Enable snow automatically for November (10) and December (11)
+            if (currentMonth === 10 || currentMonth === 11) {
+                if (typeof snowStorm !== 'undefined') {
+                    snowStorm.start();
+                }
+            }
+        }
+
+        // Call seasonal snow check after snowStorm is loaded
+        setTimeout(enableSeasonalSnow, 100);
 
         console.log("bitnuke.io")
         console.log("see you in 24 hours...")

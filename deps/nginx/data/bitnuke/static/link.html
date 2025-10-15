@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
   </head>
   <body class=bg>
@@ -68,6 +69,22 @@
 
       // Clean up old cookies when page loads
       cleanupOldCookies();
+
+      // Auto-enable snow during November and December
+      function enableSeasonalSnow() {
+          const currentDate = new Date();
+          const currentMonth = currentDate.getMonth(); // 0 = January, 10 = November, 11 = December
+          
+          // Enable snow automatically for November (10) and December (11)
+          if (currentMonth === 10 || currentMonth === 11) {
+              if (typeof snowStorm !== 'undefined') {
+                  snowStorm.start();
+              }
+          }
+      }
+
+      // Call seasonal snow check after snowStorm is loaded
+      setTimeout(enableSeasonalSnow, 100);
 
       $('#link').submit(function () {
         $.post('/compress', $('#link').serialize(), function (data) {

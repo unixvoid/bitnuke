@@ -235,6 +235,222 @@ h1 span {
   font-weight: normal;
 }
 
+/* Modern Card-Based Design */
+.cards-container {
+  width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-card {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(32, 32, 32, 0.4);
+  border-radius: 8px;
+  padding: 0;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-card:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(32, 32, 32, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(32, 32, 32, 0.2);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.file-icon {
+  color: rgba(32, 32, 32, 0.7);
+  font-size: 20px;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(32, 32, 32, 1);
+}
+
+.file-name a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.file-name a:hover {
+  color: rgba(32, 32, 32, 0.8);
+}
+
+.file-status {
+  font-size: 12px;
+  color: rgba(32, 32, 32, 0.6);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  align-self: flex-start;
+}
+
+.delete-btn-card {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(32, 32, 32, 0.3);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(32, 32, 32, 1);
+}
+
+.delete-btn-card:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(32, 32, 32, 0.5);
+  transform: scale(1.05);
+}
+
+.delete-btn-card .material-icons {
+  font-size: 18px;
+}
+
+.card-body {
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.card-btn {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(32, 32, 32, 0.3);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(32, 32, 32, 1);
+}
+
+.card-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(32, 32, 32, 0.5);
+  transform: translateY(-1px);
+}
+
+.card-btn .material-icons {
+  font-size: 16px;
+}
+
+
+
+.copy-btn .material-icons, .shorten-btn .material-icons {
+  font-size: 12px;
+}
+
+.delete-cell {
+  text-align: center;
+  white-space: nowrap;
+  width: 80px;
+}
+
+.action-btn {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(32, 32, 32, 0.3);
+  border-radius: 3px;
+  padding: 12px 8px;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.action-btn .material-icons {
+  font-size: 18px;
+}
+
+.shorten-btn:hover {
+  background: rgba(255, 193, 7, 0.3);
+}
+
+.delete-btn:hover {
+  background: rgba(220, 53, 69, 0.3);
+}
+
+.table-container {
+  width: 700px;
+  margin: 0 auto;
+  border: 2px solid rgba(32, 32, 32, 1) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, .1);
+}
+
+#writezone2 table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+#writezone2 th {
+  background-color: rgba(0, 0, 0, .4) !important;
+  border-bottom: 1px solid rgba(32, 32, 32, 0.8);
+  border-right: 1px solid rgba(32, 32, 32, 0.6);
+}
+
+#writezone2 th:last-child {
+  border-right: none;
+}
+
+#writezone2 td {
+  padding: 8px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(32, 32, 32, 0.4);
+  border-right: 1px solid rgba(32, 32, 32, 0.4);
+}
+
+#writezone2 td:last-child {
+  border-right: none;
+}
+
+#writezone2 tr:last-child td {
+  border-bottom: none;
+}
+
 .custom-file-upload-hidden {
   display: none;
   visibility: hidden;
