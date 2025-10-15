@@ -3,3 +3,4 @@ bin/
 stage.tmp/
 deps/redis/
 *.swp
+data/.tmp

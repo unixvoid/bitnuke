@@ -33,6 +33,42 @@
       <div id=writezone></div>
       </center>
       <script>
+      // Function to clean up cookies older than 24 hours (shared functionality with index.html)
+      function cleanupOldCookies() {
+          const now = new Date().getTime();
+          const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+          
+          const allCookies = document.cookie.split(';');
+          
+          for (let i = 0; i < allCookies.length; i++) {
+              const tmpCookie = allCookies[i].split(/=(.+)/);
+              let name = tmpCookie[0];
+              name = name.replace(/\s+/g, ''); // remove spaces
+              
+              if (tmpCookie[1]) {
+                  try {
+                      const encodedString = tmpCookie[1];
+                      const decodedString = atob(encodedString);
+                      const value = JSON.parse(decodedString);
+                      
+                      // Check if this cookie has a timestamp and if it's older than 24 hours
+                      if (value.timestamp && (now - value.timestamp) > twentyFourHours) {
+                          console.log(`Removing expired cookie: ${name}`);
+                          // Set cookie expiration to past date to delete it
+                          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                      }
+                  } catch (e) {
+                      // If we can't parse the cookie, it might be from an old format or not ours
+                      // Skip it to avoid errors
+                      continue;
+                  }
+              }
+          }
+      }
+
+      // Clean up old cookies when page loads
+      cleanupOldCookies();
+
       $('#link').submit(function () {
         $.post('/compress', $('#link').serialize(), function (data) {
           $('#writezone').empty().append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
@@ -41,7 +77,7 @@
         return false;
       });
       console.log("bitnuke.io")
-      console.log("see you in 12 hours...")
+      console.log("see you in 24 hours...")
       </script>
       <div class=footer>
         <center>

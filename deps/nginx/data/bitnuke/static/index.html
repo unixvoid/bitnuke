@@ -45,6 +45,39 @@
       </center>
 
       <script>
+        // Function to clean up cookies older than 24 hours
+        function cleanupOldCookies() {
+            const now = new Date().getTime();
+            const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            
+            const allCookies = document.cookie.split(';');
+            
+            for (let i = 0; i < allCookies.length; i++) {
+                const tmpCookie = allCookies[i].split(/=(.+)/);
+                let name = tmpCookie[0];
+                name = name.replace(/\s+/g, ''); // remove spaces
+                
+                if (tmpCookie[1]) {
+                    try {
+                        const encodedString = tmpCookie[1];
+                        const decodedString = atob(encodedString);
+                        const value = JSON.parse(decodedString);
+                        
+                        // Check if this cookie has a timestamp and if it's older than 24 hours
+                        if (value.timestamp && (now - value.timestamp) > twentyFourHours) {
+                            console.log(`Removing expired cookie: ${name}`);
+                            // Set cookie expiration to past date to delete it
+                            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                        }
+                    } catch (e) {
+                        // If we can't parse the cookie, it might be from an old format or not ours
+                        // Skip it to avoid errors
+                        continue;
+                    }
+                }
+            }
+        }
+
         function appendToCookie(cookieName, newField, newValue) {
             // Helper function to get cookie by name
             function getCookie(name) {
@@ -137,6 +170,9 @@
         };
 
         function checkCookies() {
+          // Clean up old cookies first
+          cleanupOldCookies();
+          
           // initiate data table
           var targetTable = "<table><tr><th id=min_width>Link</th><th>Shorten</th><th>Delete</th></tr>";
           var allCookies = document.cookie.split(';');
@@ -145,21 +181,31 @@
               var tmpCookie = allCookies[i].split(/=(.+)/);
               var name = tmpCookie[0];
               name = name.replace(/\s+/g, '');       // remove spaces
-              encodedString = tmpCookie[1]
-              decodedString = atob(encodedString);
-              var value = JSON.parse(decodedString);
+              
+              if (tmpCookie[1]) {
+                try {
+                  encodedString = tmpCookie[1]
+                  decodedString = atob(encodedString);
+                  var value = JSON.parse(decodedString);
 
-              // build table with data
-              // if cookie contains "compressed" key, make the href link the shortened val.
-              console.log(value)
-              if ("compressed" in value) {
-                targetTable += '<tr><td><a id='+value.file_name+' href='+value.compressed+'>'+value.file_name+'</a></td>';
-              } else {
-                targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+                  // Only process cookies that have our expected structure (file info)
+                  if (value.sec_key && value.removal_key && value.file_name) {
+                    // build table with data
+                    // if cookie contains "compressed" key, make the href link the shortened val.
+                    console.log(value)
+                    if ("compressed" in value) {
+                      targetTable += '<tr><td><a id='+value.file_name+' href='+value.compressed+'>'+value.file_name+'</a></td>';
+                    } else {
+                      targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+                    }
+                    targetTable += '<td id=removal><a href="#" onclick="shortenLink(\''+name+'\',\''+value.sec_key+'\');">🗙 </a</td>';
+                    targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
+                  }
+                } catch (e) {
+                  // Skip cookies that can't be parsed (not our format)
+                  continue;
+                }
               }
-              targetTable += '<td id=removal><a href="#" onclick="shortenLink(\''+name+'\',\''+value.sec_key+'\');">🗙 </a</td>';
-              targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
-
             }
             targetTable += '</table>';
             document.getElementById("writezone2").innerHTML = targetTable;
@@ -174,12 +220,55 @@
             this.on("success", function(file, response) {
               this.removeAllFiles();
               document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
+              
+              // Add timestamp to newly created cookies for cleanup tracking
+              // The response should contain the file_id, we need to update the cookie to include timestamp
+              setTimeout(() => {
+                // Get all cookies and find the one that was just created
+                const allCookies = document.cookie.split(';');
+                for (let i = 0; i < allCookies.length; i++) {
+                  const tmpCookie = allCookies[i].split(/=(.+)/);
+                  let name = tmpCookie[0];
+                  name = name.replace(/\s+/g, '');
+                  
+                  if (tmpCookie[1]) {
+                    try {
+                      const decodedString = atob(tmpCookie[1]);
+                      const cookieObj = JSON.parse(decodedString);
+                      
+                      // If this cookie doesn't have a timestamp yet, add one
+                      if (cookieObj.sec_key && cookieObj.removal_key && !cookieObj.timestamp) {
+                        cookieObj.timestamp = new Date().getTime();
+                        const updatedCookieValue = JSON.stringify(cookieObj);
+                        const encodedValue = btoa(updatedCookieValue);
+                        
+                        // Set cookie to expire in 25 hours (a bit longer than file storage for safety)
+                        const expirationDate = new Date();
+                        expirationDate.setHours(expirationDate.getHours() + 25);
+                        document.cookie = `${name}=${encodedValue}; expires=${expirationDate.toUTCString()}; path=/`;
+                      }
+                    } catch (e) {
+                      // Skip invalid cookies
+                      continue;
+                    }
+                  }
+                }
+              }, 100); // Small delay to ensure cookie is set
+              
               checkCookies();
             });
           }
         };
 
+        // Clean up old cookies on page load
+        cleanupOldCookies();
         checkCookies();
+
+        // Set up periodic cleanup every 30 minutes
+        setInterval(function() {
+            cleanupOldCookies();
+            checkCookies(); // Refresh the display after cleanup
+        }, 30 * 60 * 1000); // 30 minutes
 
         console.log("bitnuke.io")
         console.log("see you in 24 hours...")
