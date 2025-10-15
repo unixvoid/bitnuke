@@ -32,6 +32,8 @@
         <!--<input type="submit" value="submit">-->
       </form></br>
       <div id=writezone></div>
+      </br>
+      <div id=linkhistory></div>
       </center>
       <script>
       // Function to clean up cookies older than 24 hours (shared functionality with index.html)
@@ -67,6 +69,111 @@
           }
       }
 
+      // Function to copy text to clipboard
+      function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+          // Visual feedback
+          const originalText = button.innerHTML;
+          button.innerHTML = '✓ Copied!';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 2000);
+        }).catch(function(err) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          const originalText = button.innerHTML;
+          button.innerHTML = '✓ Copied!';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 2000);
+        });
+      }
+
+      // Function to store shortened link in cookie
+      function storeShortenedLink(originalUrl, shortId) {
+        const linkData = {
+          original_url: originalUrl,
+          short_id: shortId,
+          short_url: window.location.protocol + "//" + window.location.hostname + "/" + shortId,
+          timestamp: new Date().getTime()
+        };
+
+        const encodedValue = btoa(JSON.stringify(linkData));
+        
+        // Set cookie to expire in 25 hours
+        const expirationDate = new Date();
+        expirationDate.setHours(expirationDate.getHours() + 25);
+        document.cookie = `link_${shortId}=${encodedValue}; expires=${expirationDate.toUTCString()}; path=/`;
+      }
+
+      // Function to display link history
+      function displayLinkHistory() {
+        // Clean up old cookies first
+        cleanupOldCookies();
+        
+        const cardContainer = document.getElementById('linkhistory');
+        let historyHTML = '';
+        
+        const allCookies = document.cookie.split(';');
+        const linkCookies = [];
+        
+        // Find all link cookies
+        for (let i = 0; i < allCookies.length; i++) {
+          const tmpCookie = allCookies[i].split(/=(.+)/);
+          let name = tmpCookie[0];
+          name = name.replace(/\s+/g, '');
+          
+          if (name.startsWith('link_') && tmpCookie[1]) {
+            try {
+              const decodedString = atob(tmpCookie[1]);
+              const linkData = JSON.parse(decodedString);
+              linkCookies.push(linkData);
+            } catch (e) {
+              // Skip invalid cookies
+              continue;
+            }
+          }
+        }
+        
+        if (linkCookies.length > 0) {
+          historyHTML = '<div class="cards-container">';
+          
+          // Sort by timestamp (newest first)
+          linkCookies.sort((a, b) => b.timestamp - a.timestamp);
+          
+          linkCookies.forEach(linkData => {
+            historyHTML += '<div class="file-card">';
+            
+            // Single row card header with link info and copy button
+            historyHTML += '<div class="card-header">';
+            historyHTML += '<div class="file-info">';
+            historyHTML += '<i class="material-icons file-icon">link</i>';
+            historyHTML += '<div class="file-details">';
+            historyHTML += '<h3 class="file-name"><a href="' + linkData.original_url + '" target="_blank">' + linkData.original_url + '</a></h3>';
+            historyHTML += '<span class="file-status">' + linkData.short_url + '</span>';
+            historyHTML += '</div>';
+            historyHTML += '</div>';
+            historyHTML += '<button class="card-btn single-row-btn" onclick="copyToClipboard(\'' + linkData.short_url + '\', this)">';
+            historyHTML += '<i class="material-icons">content_copy</i>';
+            historyHTML += '<span>Copy Short Link</span>';
+            historyHTML += '</button>';
+            historyHTML += '</div>';
+            
+            historyHTML += '</div>';
+          });
+          
+          historyHTML += '</div>';
+        }
+        
+        cardContainer.innerHTML = historyHTML;
+      }
+
       // Clean up old cookies when page loads
       cleanupOldCookies();
 
@@ -79,6 +186,8 @@
           if (currentMonth === 10 || currentMonth === 11) {
               if (typeof snowStorm !== 'undefined') {
                   snowStorm.start();
+                  console.log("❄️ Winter snow automatically enabled for " + 
+                      (currentMonth === 10 ? "November" : "December"));
               }
           }
       }
@@ -86,10 +195,26 @@
       // Call seasonal snow check after snowStorm is loaded
       setTimeout(enableSeasonalSnow, 100);
 
+      // Display link history on page load
+      displayLinkHistory();
+
       $('#link').submit(function () {
+        const originalUrl = $('input[name="link"]').val();
+        
         $.post('/compress', $('#link').serialize(), function (data) {
-          $('#writezone').empty().append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
-          //console.log(data);
+          // Store the shortened link in cookie
+          storeShortenedLink(originalUrl, data);
+          
+          // Clear the input
+          $('input[name="link"]').val('');
+          
+          // Clear the old display area
+          $('#writezone').empty();
+          
+          // Refresh the link history display
+          setTimeout(() => {
+            displayLinkHistory();
+          }, 100);
         });
         return false;
       });

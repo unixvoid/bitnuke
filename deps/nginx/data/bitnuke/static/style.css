@@ -545,3 +545,69 @@ input::placeholder {
   background: rgba(0, 0, 0, .3) !important;
   opacity: 3;
 }
+
+/* Single row button for link cards */
+.single-row-btn {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(32, 32, 32, 0.3);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(32, 32, 32, 1);
+  white-space: nowrap;
+}
+
+.single-row-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(32, 32, 32, 0.5);
+  transform: translateY(-1px);
+}
+
+.single-row-btn .material-icons {
+  font-size: 16px;
+}
+
+/* Override centering for link card text */
+.file-card .file-info {
+  text-align: left;
+  flex: 1;
+  min-width: 0; /* Allows flexbox truncation */
+  margin-right: 12px; /* Space between text and button */
+}
+
+.file-card .file-details {
+  text-align: left;
+  width: 100%;
+  min-width: 0; /* Allows flexbox truncation */
+}
+
+.file-card .file-name {
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  max-width: 100%;
+}
+
+.file-card .file-name a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.file-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
