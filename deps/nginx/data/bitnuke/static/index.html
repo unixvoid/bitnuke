@@ -9,6 +9,36 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
+    <script>
+    // Recolor black pixels of the logo to white using canvas
+    window.addEventListener('DOMContentLoaded', function() {
+      var img = document.getElementById('logo');
+      if (!img) return;
+      // Create a new image to avoid tainting the original
+      var logoImg = new window.Image();
+      logoImg.crossOrigin = "anonymous";
+      logoImg.src = img.src;
+      logoImg.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = logoImg.width;
+        canvas.height = logoImg.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(logoImg, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+          // If pixel is (almost) black and not transparent
+          if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40 && data[i+3] > 0) {
+            data[i] = 195;   // R
+            data[i+1] = 195; // G
+            data[i+2] = 195; // B
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        img.src = canvas.toDataURL();
+      };
+    });
+    </script>
   </head>
 
   <body class=bg>
