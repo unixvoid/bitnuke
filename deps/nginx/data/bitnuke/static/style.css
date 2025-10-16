@@ -1,3 +1,13 @@
+.remove-short-link-btn {
+  background: rgba(214, 122, 151, .3) !important;
+}
+.remove-short-link-btn:hover {
+  background: rgba(214, 122, 151, .5) !important;
+}
+/* Trash can button (remove link) custom background */
+.remove-short-link-btn {
+  background: rgba(214, 122, 151, .3);
+}
 /* Add gap between adjacent card buttons in card header */
 .card-header .card-btn + .card-btn {
   margin-left: 6px;
@@ -325,7 +335,7 @@ h1 span {
   /*background: rgba(0, 0, 0, 0.1);*/
   background: rgba(214, 122, 151, .3);
   border: 1px solid rgba(89, 163, 227, 0.3);
-  border-radius: 6px;
+  border-radius: 6px 8px;
   padding: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
