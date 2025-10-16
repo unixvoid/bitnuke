@@ -1,3 +1,7 @@
+/* Add gap between adjacent card buttons in card header */
+.card-header .card-btn + .card-btn {
+  margin-left: 6px;
+}
 * {
   margin: 0;
   padding: 0;
@@ -346,7 +350,9 @@ h1 span {
 }
 
 .card-btn {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 0;
+  font-size: 14px;
   /*background: rgba(0, 0, 0, 0.1);*/
   background: rgba(122,214,200, .1);
   border: 1px solid rgba(89, 163, 227, 0.3);

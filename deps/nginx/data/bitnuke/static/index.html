@@ -78,36 +78,34 @@
       <script>
         // Function to clean up cookies older than 24 hours
         function cleanupOldCookies() {
-            const now = new Date().getTime();
-            const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-            
-            const allCookies = document.cookie.split(';');
-            
-            for (let i = 0; i < allCookies.length; i++) {
-                const tmpCookie = allCookies[i].split(/=(.+)/);
-                let name = tmpCookie[0];
-                name = name.replace(/\s+/g, ''); // remove spaces
-                
-                if (tmpCookie[1]) {
-                    try {
-                        const encodedString = tmpCookie[1];
-                        const decodedString = atob(encodedString);
-                        const value = JSON.parse(decodedString);
-                        
-                        // Check if this cookie has a timestamp and if it's older than 24 hours
-                        if (value.timestamp && (now - value.timestamp) > twentyFourHours) {
-                            console.log(`Removing expired cookie: ${name}`);
-                            // Set cookie expiration to past date to delete it
-                            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                        }
-                    } catch (e) {
-                        // If we can't parse the cookie, it might be from an old format or not ours
-                        // Skip it to avoid errors
-                        continue;
-                    }
-                }
+      const now = new Date().getTime();
+      const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      const allCookies = document.cookie.split(';');
+
+      for (let i = 0; i < allCookies.length; i++) {
+        const tmpCookie = allCookies[i].split(/=(.+)/);
+        let name = tmpCookie[0];
+        name = name.replace(/\s+/g, ''); // remove spaces
+
+        if (tmpCookie[1]) {
+          try {
+            const encodedString = tmpCookie[1];
+            const decodedString = atob(encodedString);
+            const value = JSON.parse(decodedString);
+
+            // Remove if no timestamp or if timestamp is expired
+            if (!value.timestamp || (now - value.timestamp) > twentyFourHours) {
+              console.log(`Removing old or expired cookie: ${name}`);
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             }
+          } catch (e) {
+            // If we can't parse the cookie, it might be from an old format or not ours
+            continue;
+          }
         }
+      }
+    }
 
         function appendToCookie(cookieName, newField, newValue) {
             // Helper function to get cookie by name
@@ -359,14 +357,9 @@
         }
 
         function bindButtonEvents() {
-          console.log('Binding button events...');
-          
-          // Copy link buttons
           const copyButtons = document.querySelectorAll('.copy-link-btn');
-          console.log('Found copy buttons:', copyButtons.length);
           copyButtons.forEach(button => {
             button.addEventListener('click', function() {
-              console.log('Copy button clicked');
               const url = this.getAttribute('data-url');
               copyToClipboard(url, this);
             });
@@ -374,10 +367,8 @@
           
           // Shorten link buttons
           const shortenButtons = document.querySelectorAll('.shorten-link-btn');
-          console.log('Found shorten buttons:', shortenButtons.length);
           shortenButtons.forEach(button => {
             button.addEventListener('click', function() {
-              console.log('Shorten button clicked');
               const fileId = this.getAttribute('data-file-id');
               const secKey = this.getAttribute('data-sec-key');
               shortenLink(fileId, secKey);
@@ -386,10 +377,8 @@
           
           // Delete file buttons
           const deleteButtons = document.querySelectorAll('.delete-file-btn');
-          console.log('Found delete buttons:', deleteButtons.length);
           deleteButtons.forEach(button => {
             button.addEventListener('click', function() {
-              console.log('Delete button clicked');
               const fileId = this.getAttribute('data-file-id');
               const secKey = this.getAttribute('data-sec-key');
               const removalKey = this.getAttribute('data-removal-key');

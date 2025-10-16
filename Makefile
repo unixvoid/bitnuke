@@ -24,6 +24,7 @@ run:
 		bitnuke/dynamic_handler.go \
 		bitnuke/link_compressor.go \
 		bitnuke/remove.go \
+		bitnuke/remove_shortlink.go \
 		bitnuke/token_generator.go \
 		bitnuke/upload.go
 

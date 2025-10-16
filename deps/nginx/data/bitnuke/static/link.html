@@ -9,6 +9,29 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
     <script>
+      // Remove cookies that do not have a removal token or timestamp
+      function cleanupInvalidLinkCookies() {
+        const allCookies = document.cookie.split(';');
+        for (let i = 0; i < allCookies.length; i++) {
+          const tmpCookie = allCookies[i].split(/=(.+)/);
+          let name = tmpCookie[0].replace(/\s+/g, '');
+          if (name.startsWith('link_') && tmpCookie[1]) {
+            try {
+              const decodedString = atob(tmpCookie[1]);
+              const linkData = JSON.parse(decodedString);
+              // Remove if missing delete_token or timestamp
+              if (!linkData.delete_token || !linkData.timestamp) {
+                console.log(`Removing invalid link cookie: ${name}`);
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+              }
+            } catch (e) {
+              // Remove if cannot parse
+              console.log(`Removing unparsable link cookie: ${name}`);
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            }
+          }
+        }
+      }
     // Recolor black pixels of the logo to white using canvas
     window.addEventListener('DOMContentLoaded', function() {
       var img = document.getElementById('logo');
@@ -28,9 +51,9 @@
         for (var i = 0; i < data.length; i += 4) {
           // If pixel is (almost) black and not transparent
           if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40 && data[i+3] > 0) {
-            data[i] = 255;   // R
-            data[i+1] = 255; // G
-            data[i+2] = 255; // B
+            data[i] = 195;   // R
+            data[i+1] = 195; // G
+            data[i+2] = 195; // B
           }
         }
         ctx.putImageData(imageData, 0, 0);
@@ -164,16 +187,26 @@
       }
 
       // Function to store shortened link in cookie
-      function storeShortenedLink(originalUrl, shortId) {
+      function storeShortenedLink(originalUrl, responseData) {
+        // responseData is expected to be JSON: {token, delete_token}
+        let shortId, deleteToken;
+        try {
+          const parsed = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
+          shortId = parsed.token;
+          deleteToken = parsed.delete_token;
+        } catch (e) {
+          // fallback for legacy string
+          shortId = responseData;
+          deleteToken = null;
+        }
         const linkData = {
           original_url: originalUrl,
           short_id: shortId,
           short_url: window.location.protocol + "//" + window.location.hostname + "/" + shortId,
+          delete_token: deleteToken,
           timestamp: new Date().getTime()
         };
-
         const encodedValue = btoa(JSON.stringify(linkData));
-        
         // Set cookie to expire in 25 hours
         const expirationDate = new Date();
         expirationDate.setHours(expirationDate.getHours() + 25);
@@ -182,8 +215,9 @@
 
       // Function to display link history
       function displayLinkHistory() {
-        // Clean up old cookies first
-        cleanupOldCookies();
+  // Clean up old cookies first
+  cleanupOldCookies();
+  cleanupInvalidLinkCookies();
         
         const cardContainer = document.getElementById('linkhistory');
         let historyHTML = '';
@@ -217,8 +251,7 @@
           
           linkCookies.forEach(linkData => {
             historyHTML += '<div class="file-card">';
-            
-            // Single row card header with link info and copy button
+            // Card header with link info, copy, and remove buttons
             historyHTML += '<div class="card-header">';
             historyHTML += '<div class="file-info">';
             historyHTML += '<i class="material-icons file-icon">link</i>';
@@ -231,8 +264,10 @@
             historyHTML += '<i class="material-icons">content_copy</i>';
             historyHTML += '<span>Copy Short Link</span>';
             historyHTML += '</button>';
+            historyHTML += '<button class="card-btn single-row-btn remove-short-link-btn" data-short-id="' + linkData.short_id + '" data-delete-token="' + (linkData.delete_token || '') + '">';
+            historyHTML += '<i class="material-icons">delete</i>';
+            historyHTML += '</button>';
             historyHTML += '</div>';
-            
             historyHTML += '</div>';
           });
           
@@ -256,6 +291,34 @@
             console.log('Copy short link button clicked');
             const url = this.getAttribute('data-url');
             copyToClipboard(url, this);
+          });
+        });
+
+        // Remove short link buttons
+        const removeButtons = document.querySelectorAll('.remove-short-link-btn');
+        console.log('Found remove short link buttons:', removeButtons.length);
+        removeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const shortId = this.getAttribute('data-short-id');
+            const deleteToken = this.getAttribute('data-delete-token');
+            if (!shortId || !deleteToken) {
+              alert('Missing delete token or short id.');
+              return;
+            }
+            // POST to /remove-link
+            fetch('/remove-link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: `short_token=${encodeURIComponent(shortId)}&delete_token=${encodeURIComponent(deleteToken)}`
+            }).then(resp => {
+              if (resp.ok) {
+                // Remove cookie and update UI
+                document.cookie = `link_${shortId}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                displayLinkHistory();
+              } else {
+                alert('Failed to remove link.');
+              }
+            });
           });
         });
       }
@@ -288,15 +351,12 @@
         const originalUrl = $('input[name="link"]').val();
         
         $.post('/compress', $('#link').serialize(), function (data) {
-          // Store the shortened link in cookie
+          // Store the shortened link and its delete token in cookie
           storeShortenedLink(originalUrl, data);
-          
           // Clear the input
           $('input[name="link"]').val('');
-          
           // Clear the old display area
           $('#writezone').empty();
-          
           // Refresh the link history display
           setTimeout(() => {
             displayLinkHistory();
