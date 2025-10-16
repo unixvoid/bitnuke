@@ -172,28 +172,66 @@
 
         // Function to copy text to clipboard
         function copyToClipboard(text, button) {
-          navigator.clipboard.writeText(text).then(function() {
-            // Visual feedback
-            const originalText = button.innerHTML;
-            button.innerHTML = '✓ Copied!';
-            setTimeout(() => {
-              button.innerHTML = originalText;
-            }, 2000);
-          }).catch(function(err) {
-            // Fallback for older browsers
+          console.log('Attempting to copy to clipboard:', text);
+          
+          // Check if the Clipboard API is available
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+              console.log('Clipboard API copy successful');
+              // Visual feedback
+              const originalText = button.innerHTML;
+              button.innerHTML = '✓ Copied!';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            }).catch(function(err) {
+              console.error('Clipboard API failed:', err);
+              fallbackCopyToClipboard(text, button);
+            });
+          } else {
+            console.log('Clipboard API not available, using fallback');
+            fallbackCopyToClipboard(text, button);
+          }
+        }
+
+        // Fallback copy function for when Clipboard API is not available
+        function fallbackCopyToClipboard(text, button) {
+          try {
             const textArea = document.createElement('textarea');
             textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
             document.body.appendChild(textArea);
+            textArea.focus();
             textArea.select();
-            document.execCommand('copy');
+            
+            const successful = document.execCommand('copy');
             document.body.removeChild(textArea);
             
+            if (successful) {
+              console.log('Fallback copy successful');
+              const originalText = button.innerHTML;
+              button.innerHTML = '✓ Copied!';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            } else {
+              console.error('Fallback copy failed');
+              const originalText = button.innerHTML;
+              button.innerHTML = '✗ Copy Failed';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            }
+          } catch (err) {
+            console.error('Exception in fallback copy:', err);
             const originalText = button.innerHTML;
-            button.innerHTML = '✓ Copied!';
+            button.innerHTML = '✗ Copy Failed';
             setTimeout(() => {
               button.innerHTML = originalText;
             }, 2000);
-          });
+          }
         }
 
         // Function to format file size
@@ -209,90 +247,125 @@
           // Clean up old cookies first
           cleanupOldCookies();
           
-          // initiate card-based layout
-          var cardContainer = "<div class='cards-container'>";
+          // Gather all valid file cookies into an array
+          var fileCookies = [];
           var allCookies = document.cookie.split(';');
           if (allCookies != "") {
             for (var i = 0 ; i < allCookies.length; i++) {
               var tmpCookie = allCookies[i].split(/=(.+)/);
-              var name = tmpCookie[0];
-              name = name.replace(/\s+/g, '');       // remove spaces
-              
+              var name = tmpCookie[0].replace(/\s+/g, '');
               if (tmpCookie[1]) {
                 try {
-                  encodedString = tmpCookie[1]
-                  decodedString = atob(encodedString);
+                  var encodedString = tmpCookie[1];
+                  var decodedString = atob(encodedString);
                   var value = JSON.parse(decodedString);
-
-                  // Only process cookies that have our expected structure (file info)
                   if (value.sec_key && value.removal_key && value.file_name) {
-                    //console.log(value)
-                    
-                    // Prepare links
-                    var originalLink = window.location.protocol + "//" + window.location.hostname + "/" + name + "/" + value.sec_key;
-                    var hasShortLink = "compressed" in value;
-                    var shortLink = hasShortLink ? value.compressed : '';
-                    var primaryLink = hasShortLink ? shortLink : originalLink;
-                    
-                    // Build file card
-                    cardContainer += '<div class="file-card">';
-                    
-                    // Card header with file name and delete button
-                    cardContainer += '<div class="card-header">';
-                    cardContainer += '<div class="file-info">';
-                    cardContainer += '<i class="material-icons file-icon">description</i>';
-                    cardContainer += '<div class="file-details">';
-                    cardContainer += '<h3 class="file-name"><a href="' + primaryLink + '" target="_blank">' + value.file_name + '</a></h3>';
-                    
-                    // Show file size if available, otherwise show "Unknown size"
-                    var fileSize;
-                    if (value.file_size !== undefined && value.file_size !== null && value.file_size !== 0) {
-                      fileSize = formatFileSize(value.file_size);
-                    } else {
-                      fileSize = 'Unknown size';
-                    }
-                    cardContainer += '<span class="file-status">' + fileSize + '</span>';
-                    cardContainer += '</div>';
-                    cardContainer += '</div>';
-                    cardContainer += '<button class="delete-btn-card" onclick="removeLink(\'' + name + '\',\'' + value.sec_key + '\',\'' + value.removal_key + '\');" title="Delete File">';
-                    cardContainer += '<i class="material-icons">delete</i>';
-                    cardContainer += '</button>';
-                    cardContainer += '</div>';
-                    
-                    // Card body with action buttons
-                    cardContainer += '<div class="card-body">';
-                    
-                    // Primary copy button
-                    cardContainer += '<button class="card-btn primary-btn" onclick="copyToClipboard(\'' + primaryLink + '\', this)">';
-                    cardContainer += '<i class="material-icons">content_copy</i>';
-                    cardContainer += '<span>Copy Link</span>';
-                    cardContainer += '</button>';
-                    
-                    // Secondary button (shorten or copy short)
-                    if (hasShortLink) {
-                      cardContainer += '<button class="card-btn secondary-btn" onclick="copyToClipboard(\'' + shortLink + '\', this)">';
-                      cardContainer += '<i class="material-icons">content_copy</i>';
-                      cardContainer += '<span>Copy Short</span>';
-                      cardContainer += '</button>';
-                    } else {
-                      cardContainer += '<button class="card-btn secondary-btn" onclick="shortenLink(\'' + name + '\',\'' + value.sec_key + '\');">';
-                      cardContainer += '<i class="material-icons">link</i>';
-                      cardContainer += '<span>Shorten URL</span>';
-                      cardContainer += '</button>';
-                    }
-                    
-                    cardContainer += '</div>';
-                    cardContainer += '</div>';
+                    value._cookieName = name;
+                    fileCookies.push(value);
                   }
                 } catch (e) {
-                  // Skip cookies that can't be parsed (not our format)
                   continue;
                 }
               }
             }
+            // Sort by timestamp descending (newest first)
+            fileCookies.sort(function(a, b) {
+              return (b.timestamp || 0) - (a.timestamp || 0);
+            });
+            // Build card layout
+            var cardContainer = "<div class='cards-container'>";
+            for (var j = 0; j < fileCookies.length; j++) {
+              var value = fileCookies[j];
+              var name = value._cookieName;
+              var originalLink = window.location.protocol + "//" + window.location.hostname + "/" + name + "/" + value.sec_key;
+              var hasShortLink = "compressed" in value;
+              var shortLink = hasShortLink ? value.compressed : '';
+              var clickableLink = hasShortLink ? shortLink : originalLink;
+              cardContainer += '<div class="file-card">';
+              cardContainer += '<div class="card-header">';
+              cardContainer += '<div class="file-info">';
+              cardContainer += '<i class="material-icons file-icon">description</i>';
+              cardContainer += '<div class="file-details">';
+              cardContainer += '<h3 class="file-name"><a href="' + clickableLink + '" target="_blank">' + value.file_name + '</a></h3>';
+              // Show file size and upload time on the same line
+              var fileSize = (value.file_size !== undefined && value.file_size !== null && value.file_size !== 0) ? formatFileSize(value.file_size) : 'Unknown size';
+              var fileInfoLine = '<span class="file-status">' + fileSize;
+              if (value.timestamp) {
+                var localDate = new Date(value.timestamp);
+                var timeString = localDate.toLocaleString();
+                fileInfoLine += ' <span style="color:rgba(32,32,32,0.6);">| Uploaded: ' + timeString + '</span>';
+              }
+              fileInfoLine += '</span>';
+              cardContainer += fileInfoLine;
+              cardContainer += '</div>';
+              cardContainer += '</div>';
+              cardContainer += '<button class="delete-btn-card delete-file-btn" data-file-id="' + name + '" data-sec-key="' + value.sec_key + '" data-removal-key="' + value.removal_key + '" title="Delete File">';
+              cardContainer += '<i class="material-icons">delete</i>';
+              cardContainer += '</button>';
+              cardContainer += '</div>';
+              cardContainer += '<div class="card-body">';
+              cardContainer += '<button class="card-btn primary-btn copy-link-btn" data-url="' + originalLink.replace(/"/g, "&quot;") + '">';
+              cardContainer += '<i class="material-icons">content_copy</i>';
+              cardContainer += '<span>Copy Link</span>';
+              cardContainer += '</button>';
+              if (hasShortLink) {
+                cardContainer += '<button class="card-btn secondary-btn copy-link-btn" data-url="' + shortLink.replace(/"/g, "&quot;") + '">';
+                cardContainer += '<i class="material-icons">content_copy</i>';
+                cardContainer += '<span>Copy Short</span>';
+                cardContainer += '</button>';
+              } else {
+                cardContainer += '<button class="card-btn secondary-btn shorten-link-btn" data-file-id="' + name + '" data-sec-key="' + value.sec_key + '">';
+                cardContainer += '<i class="material-icons">link</i>';
+                cardContainer += '<span>Shorten URL</span>';
+                cardContainer += '</button>';
+              }
+              cardContainer += '</div>';
+              cardContainer += '</div>';
+            }
             cardContainer += '</div>';
             document.getElementById("writezone2").innerHTML = cardContainer;
+            bindButtonEvents();
           }
+        }
+
+        function bindButtonEvents() {
+          console.log('Binding button events...');
+          
+          // Copy link buttons
+          const copyButtons = document.querySelectorAll('.copy-link-btn');
+          console.log('Found copy buttons:', copyButtons.length);
+          copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              console.log('Copy button clicked');
+              const url = this.getAttribute('data-url');
+              copyToClipboard(url, this);
+            });
+          });
+          
+          // Shorten link buttons
+          const shortenButtons = document.querySelectorAll('.shorten-link-btn');
+          console.log('Found shorten buttons:', shortenButtons.length);
+          shortenButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              console.log('Shorten button clicked');
+              const fileId = this.getAttribute('data-file-id');
+              const secKey = this.getAttribute('data-sec-key');
+              shortenLink(fileId, secKey);
+            });
+          });
+          
+          // Delete file buttons
+          const deleteButtons = document.querySelectorAll('.delete-file-btn');
+          console.log('Found delete buttons:', deleteButtons.length);
+          deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              console.log('Delete button clicked');
+              const fileId = this.getAttribute('data-file-id');
+              const secKey = this.getAttribute('data-sec-key');
+              const removalKey = this.getAttribute('data-removal-key');
+              removeLink(fileId, secKey, removalKey);
+            });
+          });
         }
 
         Dropzone.options.droppy = {
@@ -301,8 +374,7 @@
         autoDiscover: false,
           init: function() {
             this.on("success", function(file, response) {
-              this.removeAllFiles();
-              document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
+            this.removeAllFiles();
               
               // Add timestamp and file size to newly created cookies
               setTimeout(() => {

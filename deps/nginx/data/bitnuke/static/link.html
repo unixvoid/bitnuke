@@ -71,28 +71,66 @@
 
       // Function to copy text to clipboard
       function copyToClipboard(text, button) {
-        navigator.clipboard.writeText(text).then(function() {
-          // Visual feedback
-          const originalText = button.innerHTML;
-          button.innerHTML = '✓ Copied!';
-          setTimeout(() => {
-            button.innerHTML = originalText;
-          }, 2000);
-        }).catch(function(err) {
-          // Fallback for older browsers
+        console.log('Attempting to copy to clipboard:', text);
+        
+        // Check if the Clipboard API is available
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(function() {
+            console.log('Clipboard API copy successful');
+            // Visual feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }).catch(function(err) {
+            console.error('Clipboard API failed:', err);
+            fallbackCopyToClipboard(text, button);
+          });
+        } else {
+          console.log('Clipboard API not available, using fallback');
+          fallbackCopyToClipboard(text, button);
+        }
+      }
+
+      // Fallback copy function for when Clipboard API is not available
+      function fallbackCopyToClipboard(text, button) {
+        try {
           const textArea = document.createElement('textarea');
           textArea.value = text;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
           document.body.appendChild(textArea);
+          textArea.focus();
           textArea.select();
-          document.execCommand('copy');
+          
+          const successful = document.execCommand('copy');
           document.body.removeChild(textArea);
           
+          if (successful) {
+            console.log('Fallback copy successful');
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          } else {
+            console.error('Fallback copy failed');
+            const originalText = button.innerHTML;
+            button.innerHTML = '✗ Copy Failed';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Exception in fallback copy:', err);
           const originalText = button.innerHTML;
-          button.innerHTML = '✓ Copied!';
+          button.innerHTML = '✗ Copy Failed';
           setTimeout(() => {
             button.innerHTML = originalText;
           }, 2000);
-        });
+        }
       }
 
       // Function to store shortened link in cookie
@@ -156,10 +194,10 @@
             historyHTML += '<i class="material-icons file-icon">link</i>';
             historyHTML += '<div class="file-details">';
             historyHTML += '<h3 class="file-name"><a href="' + linkData.original_url + '" target="_blank">' + linkData.original_url + '</a></h3>';
-            historyHTML += '<span class="file-status">' + linkData.short_url + '</span>';
+            historyHTML += '<span class="file-status link-url">' + linkData.short_url + '</span>';
             historyHTML += '</div>';
             historyHTML += '</div>';
-            historyHTML += '<button class="card-btn single-row-btn" onclick="copyToClipboard(\'' + linkData.short_url + '\', this)">';
+            historyHTML += '<button class="card-btn single-row-btn copy-short-link-btn" data-url="' + linkData.short_url.replace(/"/g, "&quot;") + '">';
             historyHTML += '<i class="material-icons">content_copy</i>';
             historyHTML += '<span>Copy Short Link</span>';
             historyHTML += '</button>';
@@ -172,6 +210,24 @@
         }
         
         cardContainer.innerHTML = historyHTML;
+        
+        // Add event listeners for copy buttons
+        bindLinkButtonEvents();
+      }
+
+      function bindLinkButtonEvents() {
+        console.log('Binding link button events...');
+        
+        // Copy short link buttons
+        const copyButtons = document.querySelectorAll('.copy-short-link-btn');
+        console.log('Found copy short link buttons:', copyButtons.length);
+        copyButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            console.log('Copy short link button clicked');
+            const url = this.getAttribute('data-url');
+            copyToClipboard(url, this);
+          });
+        });
       }
 
       // Clean up old cookies when page loads

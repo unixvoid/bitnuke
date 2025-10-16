@@ -183,10 +183,7 @@ h1 span {
 }
 
 #pre_logo {
-  padding-top: 125px;
-}
-
-#logo {
+  padding-top: 8%;
 }
 
 #post_logo {
@@ -313,6 +310,12 @@ h1 span {
   letter-spacing: 0.5px;
   text-align: left;
   align-self: flex-start;
+}
+
+/* Override uppercase for link URLs */
+.file-status.link-url {
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .delete-btn-card {
@@ -508,8 +511,6 @@ h1 span {
   border: none;
   margin-left: -1px;
   background-color: #6B05FF;
-  float: left;
-  /* IE 9 Fix */
   -moz-transition: all 0.2s ease-in;
   -o-transition: all 0.2s ease-in;
   -webkit-transition: all 0.2s ease-in;

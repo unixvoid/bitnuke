@@ -1,5 +1,6 @@
 bin/
 ./data/
+data/
 stage.tmp/
 deps/redis/
 *.swp
