@@ -10,6 +10,38 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
     <script>
+    // Snow persistence and instant toggle
+    function setSnowState(state) {
+      localStorage.setItem('bitnuke_snow', state);
+      if (typeof snowStorm !== 'undefined') {
+        if (state === 'on') {
+          snowStorm.start();
+        } else {
+          snowStorm.stop();
+        }
+      }
+    }
+
+    function toggleSnow() {
+      var current = localStorage.getItem('bitnuke_snow');
+      var newState = (current === 'on') ? 'off' : 'on';
+      setSnowState(newState);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // On load, set snow state from localStorage
+      var snowState = localStorage.getItem('bitnuke_snow');
+      if (snowState === 'on') {
+        if (typeof snowStorm !== 'undefined') snowStorm.start();
+      } else if (snowState === 'off') {
+        if (typeof snowStorm !== 'undefined') snowStorm.stop();
+      }
+      // Replace button handler
+      var btn = document.querySelector('input.hlink[value="toggle_snow"]');
+      if (btn) {
+        btn.onclick = toggleSnow;
+      }
+    });
     // Recolor black pixels of the logo to white using canvas
     window.addEventListener('DOMContentLoaded', function() {
       var img = document.getElementById('logo');

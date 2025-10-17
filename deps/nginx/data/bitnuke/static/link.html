@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -9,6 +10,38 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
     <script>
+    // Snow persistence and instant toggle
+    function setSnowState(state) {
+      localStorage.setItem('bitnuke_snow', state);
+      if (typeof snowStorm !== 'undefined') {
+        if (state === 'on') {
+          snowStorm.start();
+        } else {
+          snowStorm.stop();
+        }
+      }
+    }
+
+    function toggleSnow() {
+      var current = localStorage.getItem('bitnuke_snow');
+      var newState = (current === 'on') ? 'off' : 'on';
+      setSnowState(newState);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // On load, set snow state from localStorage
+      var snowState = localStorage.getItem('bitnuke_snow');
+      if (snowState === 'on') {
+        if (typeof snowStorm !== 'undefined') snowStorm.start();
+      } else if (snowState === 'off') {
+        if (typeof snowStorm !== 'undefined') snowStorm.stop();
+      }
+      // Replace button handler
+      var btn = document.querySelector('input.hlink[value="toggle_snow"]');
+      if (btn) {
+        btn.onclick = toggleSnow;
+      }
+    });
       // Remove cookies that do not have a removal token or timestamp
       function cleanupInvalidLinkCookies() {
         const allCookies = document.cookie.split(';');
@@ -21,12 +54,10 @@
               const linkData = JSON.parse(decodedString);
               // Remove if missing delete_token or timestamp
               if (!linkData.delete_token || !linkData.timestamp) {
-                console.log(`Removing invalid link cookie: ${name}`);
                 document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
               }
             } catch (e) {
               // Remove if cannot parse
-              console.log(`Removing unparsable link cookie: ${name}`);
               document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             }
           }
@@ -151,12 +182,10 @@
 
       // Function to copy text to clipboard
       function copyToClipboard(text, button) {
-        console.log('Attempting to copy to clipboard:', text);
         
         // Check if the Clipboard API is available
         if (navigator.clipboard && window.isSecureContext) {
           navigator.clipboard.writeText(text).then(function() {
-            console.log('Clipboard API copy successful');
             // Visual feedback
             const originalText = button.innerHTML;
             button.innerHTML = '✓ Copied!';
@@ -168,7 +197,6 @@
             fallbackCopyToClipboard(text, button);
           });
         } else {
-          console.log('Clipboard API not available, using fallback');
           fallbackCopyToClipboard(text, button);
         }
       }
@@ -189,7 +217,6 @@
           document.body.removeChild(textArea);
           
           if (successful) {
-            console.log('Fallback copy successful');
             const originalText = button.innerHTML;
             button.innerHTML = '✓ Copied!';
             setTimeout(() => {
@@ -308,14 +335,11 @@
       }
 
       function bindLinkButtonEvents() {
-        console.log('Binding link button events...');
         
         // Copy short link buttons
         const copyButtons = document.querySelectorAll('.copy-short-link-btn');
-        console.log('Found copy short link buttons:', copyButtons.length);
         copyButtons.forEach(button => {
           button.addEventListener('click', function() {
-            console.log('Copy short link button clicked');
             const url = this.getAttribute('data-url');
             copyToClipboard(url, this);
           });
@@ -323,7 +347,6 @@
 
         // Remove short link buttons
         const removeButtons = document.querySelectorAll('.remove-short-link-btn');
-        console.log('Found remove short link buttons:', removeButtons.length);
         removeButtons.forEach(button => {
           button.addEventListener('click', function() {
             const shortId = this.getAttribute('data-short-id');
@@ -362,8 +385,6 @@
           if (currentMonth === 10 || currentMonth === 11) {
               if (typeof snowStorm !== 'undefined') {
                   snowStorm.start();
-                  console.log("❄️ Winter snow automatically enabled for " + 
-                      (currentMonth === 10 ? "November" : "December"));
               }
           }
       }
