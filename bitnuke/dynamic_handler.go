@@ -47,7 +47,7 @@ func handlerdynamic(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 		fmt.Fprintf(w, "token not found")
 	} else {
 
-		glogger.Debug.Printf("Responsing to %s :: from: %s\n", dataId, ip)
+		glogger.Debug.Printf("Responding to %s :: from: %s\n", dataId, ip)
 
 		// token exists, try and decrypt
 		val, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", config.Bitnuke.FileStorePath, longFileId))

@@ -48,16 +48,21 @@ func linkcompressor(w http.ResponseWriter, r *http.Request, redisClient *redis.C
 	glogger.Debug.Println("creating link")
 	content64Str := base64.StdEncoding.EncodeToString([]byte(r.PostFormValue("link")))
 
-	// generate token and hash it to store in db
-	token := tokenGen(config.Bitnuke.LinkTokenSize, redisClient)
-	hash := sha3.Sum512([]byte(token))
-	hashstr := fmt.Sprintf("%x", hash)
+		// generate token and hash it to store in db
+		token := tokenGen(config.Bitnuke.LinkTokenSize, redisClient)
+		hash := sha3.Sum512([]byte(token))
+		hashstr := fmt.Sprintf("%x", hash)
 
-	// throw it in the db
-	redisClient.Set(fmt.Sprintf("link:%s", hashstr), content64Str, 0).Err()
-	redisClient.Expire(fmt.Sprintf("link:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
+		// generate a delete token for the short link
+		deleteToken := tokenGen(config.Bitnuke.LinkTokenSize, redisClient)
 
-	// return token to redisClient
-	w.Header().Set("compressor", token)
-	fmt.Fprintf(w, "%s", token)
+		// store the short link and its delete token in redis
+		redisClient.Set(fmt.Sprintf("link:%s", hashstr), content64Str, 0).Err()
+		redisClient.Set(fmt.Sprintf("link_delete_token:%s", hashstr), deleteToken, 0).Err()
+		redisClient.Expire(fmt.Sprintf("link:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
+		redisClient.Expire(fmt.Sprintf("link_delete_token:%s", hashstr), (config.Bitnuke.TTL * time.Hour)).Err()
+
+		// return both tokens to the client (as JSON for clarity)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"token":"%s","delete_token":"%s"}` , token, deleteToken)
 }

@@ -24,8 +24,23 @@ run:
 		bitnuke/dynamic_handler.go \
 		bitnuke/link_compressor.go \
 		bitnuke/remove.go \
+		bitnuke/remove_shortlink.go \
 		bitnuke/token_generator.go \
 		bitnuke/upload.go
+
+webdev:
+	$(OS_PERMS) docker run \
+		-d \
+		--name bitnuke-webdev \
+		-v ./deps/nginx/nginx-local.conf:/nginx/conf/nginx.conf:ro \
+		-v ./deps/nginx/mime.types:/nginx/conf/mime.types:ro \
+		-v ./deps/nginx/data:/nginx/data:ro \
+		-p 8881:80 \
+		unixvoid/nginx:1.19.6
+	$(OS_PERMS) docker logs -f bitnuke-webdev
+
+stop-webdev:
+	$(OS_PERMS) docker stop -t 0 bitnuke-webdev && sudo docker rm bitnuke-webdev
 
 docker: clean stat
 	rm -rf stage.tmp/

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -6,7 +7,91 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
+    <script>
+    // Snow persistence and instant toggle
+    function setSnowState(state) {
+      localStorage.setItem('bitnuke_snow', state);
+      if (typeof snowStorm !== 'undefined') {
+        if (state === 'on') {
+          snowStorm.start();
+        } else {
+          snowStorm.stop();
+        }
+      }
+    }
+
+    function toggleSnow() {
+      var current = localStorage.getItem('bitnuke_snow');
+      var newState = (current === 'on') ? 'off' : 'on';
+      setSnowState(newState);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // On load, set snow state from localStorage
+      var snowState = localStorage.getItem('bitnuke_snow');
+      if (snowState === 'on') {
+        if (typeof snowStorm !== 'undefined') snowStorm.start();
+      } else if (snowState === 'off') {
+        if (typeof snowStorm !== 'undefined') snowStorm.stop();
+      }
+      // Replace button handler
+      var btn = document.querySelector('input.hlink[value="toggle_snow"]');
+      if (btn) {
+        btn.onclick = toggleSnow;
+      }
+    });
+      // Remove cookies that do not have a removal token or timestamp
+      function cleanupInvalidLinkCookies() {
+        const allCookies = document.cookie.split(';');
+        for (let i = 0; i < allCookies.length; i++) {
+          const tmpCookie = allCookies[i].split(/=(.+)/);
+          let name = tmpCookie[0].replace(/\s+/g, '');
+          if (name.startsWith('link_') && tmpCookie[1]) {
+            try {
+              const decodedString = atob(tmpCookie[1]);
+              const linkData = JSON.parse(decodedString);
+              // Remove if missing delete_token or timestamp
+              if (!linkData.delete_token || !linkData.timestamp) {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+              }
+            } catch (e) {
+              // Remove if cannot parse
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            }
+          }
+        }
+      }
+    // Recolor black pixels of the logo to white using canvas
+    window.addEventListener('DOMContentLoaded', function() {
+      var img = document.getElementById('logo');
+      if (!img) return;
+      // Create a new image to avoid tainting the original
+      var logoImg = new window.Image();
+      logoImg.crossOrigin = "anonymous";
+      logoImg.src = img.src;
+      logoImg.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = logoImg.width;
+        canvas.height = logoImg.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(logoImg, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+          // If pixel is (almost) black and not transparent
+          if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40 && data[i+3] > 0) {
+            data[i] = 195;   // R
+            data[i+1] = 195; // G
+            data[i+2] = 195; // B
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        img.src = canvas.toDataURL();
+      };
+    });
+    </script>
   </head>
   <body class=bg>
     <div class=tint>
@@ -15,14 +100,41 @@
       <center><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></br></center>
       <div id=post_logo></div>
       <center>
-        <div>
-          <p class=msg>
-            bitnuke.io is an anonymous temporary file storage site.
-          </p>
-          <p class=msg>
-            Your files are stored for 24 hours and then deleted permanently.
-          </p>
+        <div style="position: relative; display: inline-block;">
+          <div id="desc-lines" style="cursor: pointer;">
+            <p class=msg>
+              bitnuke.io is an anonymous temporary file storage site.
+            </p>
+            <p class=msg>
+              Your files are stored for 24 hours and then deleted permanently.
+            </p>
+          </div>
+          <div id="encryption-info" style="display:none; position:absolute; left:0; top:100%; background:rgb(31, 35, 45); color: rgb(201, 201, 201); font-size:1em; padding:10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:10; min-width:260px;">
+            Files are encrypted using AES-256. Encryption keys are only stored in your browser and never sent to the server.
+          </div>
         </div></br>
+      <script>
+      // Show/hide encryption info on hover
+      document.addEventListener('DOMContentLoaded', function() {
+        var desc = document.getElementById('desc-lines');
+        var info = document.getElementById('encryption-info');
+        if (desc && info) {
+          desc.addEventListener('mouseenter', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('mouseleave', function() {
+            info.style.display = 'none';
+          });
+          // For accessibility: show on focus, hide on blur
+          desc.addEventListener('focus', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('blur', function() {
+            info.style.display = 'none';
+          });
+        }
+      });
+      </script>
       </center>
       <div id=post_logo></div>
       <center>
@@ -31,17 +143,277 @@
         <!--<input type="submit" value="submit">-->
       </form></br>
       <div id=writezone></div>
+      </br>
+      <div id=linkhistory></div>
       </center>
       <script>
+      // Function to clean up cookies older than 24 hours (shared functionality with index.html)
+      function cleanupOldCookies() {
+          const now = new Date().getTime();
+          const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+          
+          const allCookies = document.cookie.split(';');
+          
+          for (let i = 0; i < allCookies.length; i++) {
+              const tmpCookie = allCookies[i].split(/=(.+)/);
+              let name = tmpCookie[0];
+              name = name.replace(/\s+/g, ''); // remove spaces
+              
+              if (tmpCookie[1]) {
+                  try {
+                      const encodedString = tmpCookie[1];
+                      const decodedString = atob(encodedString);
+                      const value = JSON.parse(decodedString);
+                      
+                      // Check if this cookie has a timestamp and if it's older than 24 hours
+                      if (value.timestamp && (now - value.timestamp) > twentyFourHours) {
+                          console.log(`Removing expired cookie: ${name}`);
+                          // Set cookie expiration to past date to delete it
+                          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                      }
+                  } catch (e) {
+                      // If we can't parse the cookie, it might be from an old format or not ours
+                      // Skip it to avoid errors
+                      continue;
+                  }
+              }
+          }
+      }
+
+      // Function to copy text to clipboard
+      function copyToClipboard(text, button) {
+        
+        // Check if the Clipboard API is available
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(function() {
+            // Visual feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }).catch(function(err) {
+            console.error('Clipboard API failed:', err);
+            fallbackCopyToClipboard(text, button);
+          });
+        } else {
+          fallbackCopyToClipboard(text, button);
+        }
+      }
+
+      // Fallback copy function for when Clipboard API is not available
+      function fallbackCopyToClipboard(text, button) {
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          if (successful) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          } else {
+            console.error('Fallback copy failed');
+            const originalText = button.innerHTML;
+            button.innerHTML = '✗ Copy Failed';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }
+        } catch (err) {
+          console.error('Exception in fallback copy:', err);
+          const originalText = button.innerHTML;
+          button.innerHTML = '✗ Copy Failed';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 2000);
+        }
+      }
+
+      // Function to store shortened link in cookie
+      function storeShortenedLink(originalUrl, responseData) {
+        // responseData is expected to be JSON: {token, delete_token}
+        let shortId, deleteToken;
+        try {
+          const parsed = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
+          shortId = parsed.token;
+          deleteToken = parsed.delete_token;
+        } catch (e) {
+          // fallback for legacy string
+          shortId = responseData;
+          deleteToken = null;
+        }
+        const linkData = {
+          original_url: originalUrl,
+          short_id: shortId,
+          short_url: window.location.protocol + "//" + window.location.hostname + "/" + shortId,
+          delete_token: deleteToken,
+          timestamp: new Date().getTime()
+        };
+        const encodedValue = btoa(JSON.stringify(linkData));
+        // Set cookie to expire in 25 hours
+        const expirationDate = new Date();
+        expirationDate.setHours(expirationDate.getHours() + 25);
+        document.cookie = `link_${shortId}=${encodedValue}; expires=${expirationDate.toUTCString()}; path=/`;
+      }
+
+      // Function to display link history
+      function displayLinkHistory() {
+  // Clean up old cookies first
+  cleanupOldCookies();
+  cleanupInvalidLinkCookies();
+        
+        const cardContainer = document.getElementById('linkhistory');
+        let historyHTML = '';
+        
+        const allCookies = document.cookie.split(';');
+        const linkCookies = [];
+        
+        // Find all link cookies
+        for (let i = 0; i < allCookies.length; i++) {
+          const tmpCookie = allCookies[i].split(/=(.+)/);
+          let name = tmpCookie[0];
+          name = name.replace(/\s+/g, '');
+          
+          if (name.startsWith('link_') && tmpCookie[1]) {
+            try {
+              const decodedString = atob(tmpCookie[1]);
+              const linkData = JSON.parse(decodedString);
+              linkCookies.push(linkData);
+            } catch (e) {
+              // Skip invalid cookies
+              continue;
+            }
+          }
+        }
+        
+        if (linkCookies.length > 0) {
+          historyHTML = '<div class="cards-container">';
+          
+          // Sort by timestamp (newest first)
+          linkCookies.sort((a, b) => b.timestamp - a.timestamp);
+          
+          linkCookies.forEach(linkData => {
+            historyHTML += '<div class="file-card">';
+            // Card header with link info, copy, and remove buttons
+            historyHTML += '<div class="card-header">';
+            historyHTML += '<div class="file-info">';
+            historyHTML += '<i class="material-icons file-icon">link</i>';
+            historyHTML += '<div class="file-details">';
+            historyHTML += '<h3 class="file-name"><a href="' + linkData.original_url + '" target="_blank">' + linkData.original_url + '</a></h3>';
+            historyHTML += '<span class="file-status link-url">' + linkData.short_url + '</span>';
+            historyHTML += '</div>';
+            historyHTML += '</div>';
+            historyHTML += '<button class="card-btn single-row-btn copy-short-link-btn" data-url="' + linkData.short_url.replace(/"/g, "&quot;") + '">';
+            historyHTML += '<i class="material-icons">content_copy</i>';
+            historyHTML += '<span>Copy Short Link</span>';
+            historyHTML += '</button>';
+            historyHTML += '<button class="card-btn single-row-btn remove-short-link-btn" data-short-id="' + linkData.short_id + '" data-delete-token="' + (linkData.delete_token || '') + '">';
+            historyHTML += '<i class="material-icons">delete</i>';
+            historyHTML += '</button>';
+            historyHTML += '</div>';
+            historyHTML += '</div>';
+          });
+          
+          historyHTML += '</div>';
+        }
+        
+        cardContainer.innerHTML = historyHTML;
+        
+        // Add event listeners for copy buttons
+        bindLinkButtonEvents();
+      }
+
+      function bindLinkButtonEvents() {
+        
+        // Copy short link buttons
+        const copyButtons = document.querySelectorAll('.copy-short-link-btn');
+        copyButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            copyToClipboard(url, this);
+          });
+        });
+
+        // Remove short link buttons
+        const removeButtons = document.querySelectorAll('.remove-short-link-btn');
+        removeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const shortId = this.getAttribute('data-short-id');
+            const deleteToken = this.getAttribute('data-delete-token');
+            if (!shortId || !deleteToken) {
+              alert('Missing delete token or short id.');
+              return;
+            }
+            // POST to /remove-link
+            fetch('/remove-link', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: `short_token=${encodeURIComponent(shortId)}&delete_token=${encodeURIComponent(deleteToken)}`
+            }).then(resp => {
+              if (resp.ok) {
+                // Remove cookie and update UI
+                document.cookie = `link_${shortId}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                displayLinkHistory();
+              } else {
+                alert('Failed to remove link.');
+              }
+            });
+          });
+        });
+      }
+
+      // Clean up old cookies when page loads
+      cleanupOldCookies();
+
+      // Auto-enable snow during November and December
+      function enableSeasonalSnow() {
+          const currentDate = new Date();
+          const currentMonth = currentDate.getMonth(); // 0 = January, 10 = November, 11 = December
+          
+          // Enable snow automatically for November (10) and December (11)
+          if (currentMonth === 10 || currentMonth === 11) {
+              if (typeof snowStorm !== 'undefined') {
+                  snowStorm.start();
+              }
+          }
+      }
+
+      // Call seasonal snow check after snowStorm is loaded
+      setTimeout(enableSeasonalSnow, 100);
+
+      // Display link history on page load
+      displayLinkHistory();
+
       $('#link').submit(function () {
+        const originalUrl = $('input[name="link"]').val();
+        
         $.post('/compress', $('#link').serialize(), function (data) {
-          $('#writezone').empty().append((window.location.protocol + '//' + window.location.hostname + '/' + data).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + data));
-          //console.log(data);
+          // Store the shortened link and its delete token in cookie
+          storeShortenedLink(originalUrl, data);
+          // Clear the input
+          $('input[name="link"]').val('');
+          // Clear the old display area
+          $('#writezone').empty();
+          // Refresh the link history display
+          setTimeout(() => {
+            displayLinkHistory();
+          }, 100);
         });
         return false;
       });
       console.log("bitnuke.io")
-      console.log("see you in 12 hours...")
+      console.log("see you in 24 hours...")
       </script>
       <div class=footer>
         <center>

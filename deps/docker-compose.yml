@@ -14,15 +14,13 @@ services:
     links:
       - bitnuke
   redis:
-    image: redis:6.0.9-alpine
+    image: redis:6.2-alpine
     restart: always
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-      - ./redis/:/redisbackup/:rw
-    user: "1000:1000"
+      - ./redis/:/data/:rw
     expose:
       - "6397"
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server --save 20 1
     network_mode: "bridge"
   bitnuke:
     image: unixvoid/bitnuke

@@ -7,7 +7,70 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="static/snowstorm.js"></script>
+    <script>
+    // Snow persistence and instant toggle
+    function setSnowState(state) {
+      localStorage.setItem('bitnuke_snow', state);
+      if (typeof snowStorm !== 'undefined') {
+        if (state === 'on') {
+          snowStorm.start();
+        } else {
+          snowStorm.stop();
+        }
+      }
+    }
+
+    function toggleSnow() {
+      var current = localStorage.getItem('bitnuke_snow');
+      var newState = (current === 'on') ? 'off' : 'on';
+      setSnowState(newState);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // On load, set snow state from localStorage
+      var snowState = localStorage.getItem('bitnuke_snow');
+      if (snowState === 'on') {
+        if (typeof snowStorm !== 'undefined') snowStorm.start();
+      } else if (snowState === 'off') {
+        if (typeof snowStorm !== 'undefined') snowStorm.stop();
+      }
+      // Replace button handler
+      var btn = document.querySelector('input.hlink[value="toggle_snow"]');
+      if (btn) {
+        btn.onclick = toggleSnow;
+      }
+    });
+    // Recolor black pixels of the logo to white using canvas
+    window.addEventListener('DOMContentLoaded', function() {
+      var img = document.getElementById('logo');
+      if (!img) return;
+      // Create a new image to avoid tainting the original
+      var logoImg = new window.Image();
+      logoImg.crossOrigin = "anonymous";
+      logoImg.src = img.src;
+      logoImg.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = logoImg.width;
+        canvas.height = logoImg.height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(logoImg, 0, 0);
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        for (var i = 0; i < data.length; i += 4) {
+          // If pixel is (almost) black and not transparent
+          if (data[i] < 40 && data[i+1] < 40 && data[i+2] < 40 && data[i+3] > 0) {
+            data[i] = 195;   // R
+            data[i+1] = 195; // G
+            data[i+2] = 195; // B
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        img.src = canvas.toDataURL();
+      };
+    });
+    </script>
   </head>
 
   <body class=bg>
@@ -20,14 +83,42 @@
       <div id=post_logo></div>
 
       <center>
-        <div>
-          <p class=msg>
-            bitnuke.io is an anonymous temporary file storage site.
-          </p>
-          <p class=msg>
-            Your files are stored for 24 hours and then deleted permanently.
-          </p>
+        <div style="position: relative; display: inline-block;">
+          <div id="desc-lines" style="cursor: pointer;">
+            <p class=msg>
+              bitnuke.io is an anonymous temporary file storage site.
+            </p>
+            <p class=msg>
+              Your files are stored for 24 hours and then deleted permanently.
+            </p>
+          </div>
+          <div id="encryption-info" style="display:none; position:absolute; left:0; top:100%; background:rgb(31, 35, 45); color: rgb(201, 201, 201); font-size:1em; padding:10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:10; min-width:260px;">
+            Files are encrypted using AES-256. Encryption keys are only stored in your browser and never sent to the server.
+          </div>
         </div></br>
+      <script>
+      // Show/hide encryption info on hover
+      document.addEventListener('DOMContentLoaded', function() {
+        var desc = document.getElementById('desc-lines');
+        var info = document.getElementById('encryption-info');
+        if (desc && info) {
+          desc.addEventListener('mouseenter', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('mouseleave', function() {
+            info.style.display = 'none';
+          });
+          // For accessibility: show on focus, hide on blur
+          desc.addEventListener('focus', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('blur', function() {
+            info.style.display = 'none';
+          });
+        }
+      });
+      </script>
+      </script>
       </center>
       <div id=post_logo></div>
 
@@ -45,6 +136,37 @@
       </center>
 
       <script>
+        // Function to clean up cookies older than 24 hours
+        function cleanupOldCookies() {
+      const now = new Date().getTime();
+      const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      const allCookies = document.cookie.split(';');
+
+      for (let i = 0; i < allCookies.length; i++) {
+        const tmpCookie = allCookies[i].split(/=(.+)/);
+        let name = tmpCookie[0];
+        name = name.replace(/\s+/g, ''); // remove spaces
+
+        if (tmpCookie[1]) {
+          try {
+            const encodedString = tmpCookie[1];
+            const decodedString = atob(encodedString);
+            const value = JSON.parse(decodedString);
+
+            // Remove if no timestamp or if timestamp is expired
+            if (!value.timestamp || (now - value.timestamp) > twentyFourHours) {
+              console.log(`Removing old or expired cookie: ${name}`);
+              document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            }
+          } catch (e) {
+            // If we can't parse the cookie, it might be from an old format or not ours
+            continue;
+          }
+        }
+      }
+    }
+
         function appendToCookie(cookieName, newField, newValue) {
             // Helper function to get cookie by name
             function getCookie(name) {
@@ -85,7 +207,7 @@
         
                 // Convert the updated object back to JSON string
                 let updatedCookieValue = JSON.stringify(cookieObj);
-                console.log("updatedCookieValue: " + updatedCookieValue)
+                //console.log("updatedCookieValue: " + updatedCookieValue)
         
                 // Encode the updated string back to Base64
                 let encodedValue = btoa(updatedCookieValue);
@@ -127,37 +249,202 @@
           })
 
           // reload the page/update table
-          location.reload();
+          //location.reload();
+          .finally(() => {
+              setTimeout(() => {
+                  location.reload();
+              }, 500); // Allow a slight delay for the server to process
+          });
+
         };
 
+        // Function to copy text to clipboard
+        function copyToClipboard(text, button) {
+          console.log('Attempting to copy to clipboard:', text);
+          
+          // Check if the Clipboard API is available
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+              console.log('Clipboard API copy successful');
+              // Visual feedback
+              const originalText = button.innerHTML;
+              button.innerHTML = '✓ Copied!';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            }).catch(function(err) {
+              console.error('Clipboard API failed:', err);
+              fallbackCopyToClipboard(text, button);
+            });
+          } else {
+            console.log('Clipboard API not available, using fallback');
+            fallbackCopyToClipboard(text, button);
+          }
+        }
+
+        // Fallback copy function for when Clipboard API is not available
+        function fallbackCopyToClipboard(text, button) {
+          try {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (successful) {
+              console.log('Fallback copy successful');
+              const originalText = button.innerHTML;
+              button.innerHTML = '✓ Copied!';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            } else {
+              console.error('Fallback copy failed');
+              const originalText = button.innerHTML;
+              button.innerHTML = '✗ Copy Failed';
+              setTimeout(() => {
+                button.innerHTML = originalText;
+              }, 2000);
+            }
+          } catch (err) {
+            console.error('Exception in fallback copy:', err);
+            const originalText = button.innerHTML;
+            button.innerHTML = '✗ Copy Failed';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+            }, 2000);
+          }
+        }
+
+        // Function to format file size
+        function formatFileSize(bytes) {
+          if (bytes === 0) return 'Unknown size';
+          const k = 1024;
+          const sizes = ['bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
         function checkCookies() {
-          // initiate data table
-          var targetTable = "<table><tr><th id=min_width>Link</th><th>Shorten</th><th>Delete</th></tr>";
+          // Clean up old cookies first
+          cleanupOldCookies();
+          
+          // Gather all valid file cookies into an array
+          var fileCookies = [];
           var allCookies = document.cookie.split(';');
           if (allCookies != "") {
             for (var i = 0 ; i < allCookies.length; i++) {
               var tmpCookie = allCookies[i].split(/=(.+)/);
-              var name = tmpCookie[0];
-              name = name.replace(/\s+/g, '');       // remove spaces
-              encodedString = tmpCookie[1]
-              decodedString = atob(encodedString);
-              var value = JSON.parse(decodedString);
-
-              // build table with data
-              // if cookie contains "compressed" key, make the href link the shortened val.
-              console.log(value)
-              if ("compressed" in value) {
-                targetTable += '<tr><td><a id='+value.file_name+' href='+value.compressed+'>'+value.file_name+'</a></td>';
-              } else {
-                targetTable += '<tr><td><a id='+value.file_name+' href="/'+name+'/'+value.sec_key+'">'+value.file_name+'</a></td>';
+              var name = tmpCookie[0].replace(/\s+/g, '');
+              if (tmpCookie[1]) {
+                try {
+                  var encodedString = tmpCookie[1];
+                  var decodedString = atob(encodedString);
+                  var value = JSON.parse(decodedString);
+                  if (value.sec_key && value.removal_key && value.file_name) {
+                    value._cookieName = name;
+                    fileCookies.push(value);
+                  }
+                } catch (e) {
+                  continue;
+                }
               }
-              targetTable += '<td id=removal><a href="#" onclick="shortenLink(\''+name+'\',\''+value.sec_key+'\');">🗙 </a</td>';
-              targetTable += '<td id=removal><a href="#" onclick="removeLink(\''+name+'\',\''+value.sec_key+'\',\''+value.removal_key+'\');">🗙 </a</td></tr>';
-
             }
-            targetTable += '</table>';
-            document.getElementById("writezone2").innerHTML = targetTable;
+            // Sort by timestamp descending (newest first)
+            fileCookies.sort(function(a, b) {
+              return (b.timestamp || 0) - (a.timestamp || 0);
+            });
+            // Build card layout
+            var cardContainer = "<div class='cards-container'>";
+            for (var j = 0; j < fileCookies.length; j++) {
+              var value = fileCookies[j];
+              var name = value._cookieName;
+              var originalLink = window.location.protocol + "//" + window.location.hostname + "/" + name + "/" + value.sec_key;
+              var hasShortLink = "compressed" in value;
+              var shortLink = hasShortLink ? value.compressed : '';
+              var clickableLink = hasShortLink ? shortLink : originalLink;
+              cardContainer += '<div class="file-card">';
+              cardContainer += '<div class="card-header">';
+              cardContainer += '<div class="file-info">';
+              cardContainer += '<i class="material-icons file-icon">description</i>';
+              cardContainer += '<div class="file-details">';
+              cardContainer += '<h3 class="file-name"><a href="' + clickableLink + '" target="_blank">' + value.file_name + '</a></h3>';
+              // Show file size and upload time on the same line
+              var fileSize = (value.file_size !== undefined && value.file_size !== null && value.file_size !== 0) ? formatFileSize(value.file_size) : 'Unknown size';
+              var fileInfoLine = '<span class="file-status">' + fileSize;
+              if (value.timestamp) {
+                var localDate = new Date(value.timestamp);
+                var timeString = localDate.toLocaleString();
+                fileInfoLine += ' <span style="color:rgba(201,201,201,0.6);">| Uploaded: ' + timeString + '</span>';
+              }
+              fileInfoLine += '</span>';
+              cardContainer += fileInfoLine;
+              cardContainer += '</div>';
+              cardContainer += '</div>';
+              cardContainer += '<button class="delete-btn-card delete-file-btn" data-file-id="' + name + '" data-sec-key="' + value.sec_key + '" data-removal-key="' + value.removal_key + '" title="Delete File">';
+              cardContainer += '<i class="material-icons">delete</i>';
+              cardContainer += '</button>';
+              cardContainer += '</div>';
+              cardContainer += '<div class="card-body">';
+              cardContainer += '<button class="card-btn primary-btn copy-link-btn" data-url="' + originalLink.replace(/"/g, "&quot;") + '">';
+              cardContainer += '<i class="material-icons">content_copy</i>';
+              cardContainer += '<span>Copy Link</span>';
+              cardContainer += '</button>';
+              if (hasShortLink) {
+                cardContainer += '<button class="card-btn secondary-btn copy-link-btn" data-url="' + shortLink.replace(/"/g, "&quot;") + '">';
+                cardContainer += '<i class="material-icons">content_copy</i>';
+                cardContainer += '<span>Copy Short</span>';
+                cardContainer += '</button>';
+              } else {
+                cardContainer += '<button class="card-btn secondary-btn shorten-link-btn" data-file-id="' + name + '" data-sec-key="' + value.sec_key + '">';
+                cardContainer += '<i class="material-icons">link</i>';
+                cardContainer += '<span>Shorten URL</span>';
+                cardContainer += '</button>';
+              }
+              cardContainer += '</div>';
+              cardContainer += '</div>';
+            }
+            cardContainer += '</div>';
+            document.getElementById("writezone2").innerHTML = cardContainer;
+            bindButtonEvents();
           }
+        }
+
+        function bindButtonEvents() {
+          const copyButtons = document.querySelectorAll('.copy-link-btn');
+          copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              const url = this.getAttribute('data-url');
+              copyToClipboard(url, this);
+            });
+          });
+          
+          // Shorten link buttons
+          const shortenButtons = document.querySelectorAll('.shorten-link-btn');
+          shortenButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              const fileId = this.getAttribute('data-file-id');
+              const secKey = this.getAttribute('data-sec-key');
+              shortenLink(fileId, secKey);
+            });
+          });
+          
+          // Delete file buttons
+          const deleteButtons = document.querySelectorAll('.delete-file-btn');
+          deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+              const fileId = this.getAttribute('data-file-id');
+              const secKey = this.getAttribute('data-sec-key');
+              const removalKey = this.getAttribute('data-removal-key');
+              removeLink(fileId, secKey, removalKey);
+            });
+          });
         }
 
         Dropzone.options.droppy = {
@@ -166,14 +453,74 @@
         autoDiscover: false,
           init: function() {
             this.on("success", function(file, response) {
-              this.removeAllFiles();
-              document.getElementById("writezone").innerHTML = (window.location.protocol + '//' + window.location.hostname + '/' + response).link(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/' + response);
-              checkCookies();
+            this.removeAllFiles();
+              
+              // Add timestamp and file size to newly created cookies
+              setTimeout(() => {
+                // Get all cookies and find the one that was just created
+                const allCookies = document.cookie.split(';');
+                for (let i = 0; i < allCookies.length; i++) {
+                  const tmpCookie = allCookies[i].split(/=(.+)/);
+                  let name = tmpCookie[0];
+                  name = name.replace(/\s+/g, '');
+                  
+                  if (tmpCookie[1]) {
+                    try {
+                      const decodedString = atob(tmpCookie[1]);
+                      const cookieObj = JSON.parse(decodedString);
+                      
+                      // If this cookie doesn't have a timestamp yet, add timestamp and file size
+                      if (cookieObj.sec_key && cookieObj.removal_key && !cookieObj.timestamp) {
+                        cookieObj.timestamp = new Date().getTime();
+                        cookieObj.file_size = file.size; // Add the actual file size from dropzone
+                        
+                        const updatedCookieValue = JSON.stringify(cookieObj);
+                        const encodedValue = btoa(updatedCookieValue);
+                        
+                        // Set cookie to expire in 25 hours (a bit longer than file storage for safety)
+                        const expirationDate = new Date();
+                        expirationDate.setHours(expirationDate.getHours() + 25);
+                        document.cookie = `${name}=${encodedValue}; expires=${expirationDate.toUTCString()}; path=/`;
+                      }
+                    } catch (e) {
+                      // Skip invalid cookies
+                      continue;
+                    }
+                  }
+                }
+                
+                // Refresh the display after cookie update is complete
+                checkCookies();
+              }, 100); // Small delay to ensure cookie is set
             });
           }
         };
 
+        // Clean up old cookies on page load
+        cleanupOldCookies();
         checkCookies();
+
+        // Set up periodic cleanup every 30 minutes
+        setInterval(function() {
+            cleanupOldCookies();
+            checkCookies(); // Refresh the display after cleanup
+        }, 30 * 60 * 1000); // 30 minutes
+
+        // Auto-enable snow during November and December
+        function enableSeasonalSnow() {
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth(); // 0 = January, 10 = November, 11 = December
+            
+            // Enable snow automatically for November (10) and December (11)
+            if (currentMonth === 10 || currentMonth === 11) {
+                if (typeof snowStorm !== 'undefined') {
+                    snowStorm.start();
+                }
+            }
+        }
+
+        // Call seasonal snow check after snowStorm is loaded
+        setTimeout(enableSeasonalSnow, 100);
 
         console.log("bitnuke.io")
         console.log("see you in 24 hours...")

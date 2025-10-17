@@ -85,6 +85,9 @@ func main() {
 	router.HandleFunc("/compress", func(w http.ResponseWriter, r *http.Request) {
 		linkcompressor(w, r, redisClient)
 	})
+	router.HandleFunc("/remove-link", func(w http.ResponseWriter, r *http.Request) {
+		removeShortLink(w, r, redisClient)
+	})
 	router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		// client wants favicon, send back a does not exist
 		w.WriteHeader(http.StatusNotFound)
