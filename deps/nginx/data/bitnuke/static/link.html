@@ -69,14 +69,41 @@
       <center><img src="static/bitnuke.png" alt="bitnuke.io" id=logo></br></center>
       <div id=post_logo></div>
       <center>
-        <div>
-          <p class=msg>
-            bitnuke.io is an anonymous temporary file storage site.
-          </p>
-          <p class=msg>
-            Your files are stored for 24 hours and then deleted permanently.
-          </p>
+        <div style="position: relative; display: inline-block;">
+          <div id="desc-lines" style="cursor: pointer;">
+            <p class=msg>
+              bitnuke.io is an anonymous temporary file storage site.
+            </p>
+            <p class=msg>
+              Your files are stored for 24 hours and then deleted permanently.
+            </p>
+          </div>
+          <div id="encryption-info" style="display:none; position:absolute; left:0; top:100%; background:rgb(31, 35, 45); color: rgb(201, 201, 201); font-size:1em; padding:10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:10; min-width:260px;">
+            Files are encrypted using AES-256. Encryption keys are only stored in your browser and never sent to the server.
+          </div>
         </div></br>
+      <script>
+      // Show/hide encryption info on hover
+      document.addEventListener('DOMContentLoaded', function() {
+        var desc = document.getElementById('desc-lines');
+        var info = document.getElementById('encryption-info');
+        if (desc && info) {
+          desc.addEventListener('mouseenter', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('mouseleave', function() {
+            info.style.display = 'none';
+          });
+          // For accessibility: show on focus, hide on blur
+          desc.addEventListener('focus', function() {
+            info.style.display = 'block';
+          });
+          desc.addEventListener('blur', function() {
+            info.style.display = 'none';
+          });
+        }
+      });
+      </script>
       </center>
       <div id=post_logo></div>
       <center>
