@@ -26,6 +26,7 @@
       var current = localStorage.getItem('bitnuke_snow');
       var newState = (current === 'on') ? 'off' : 'on';
       setSnowState(newState);
+      location.reload();
     }
 
     document.addEventListener('DOMContentLoaded', function() {
