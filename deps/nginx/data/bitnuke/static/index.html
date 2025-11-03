@@ -244,8 +244,9 @@
               'Content-Type': 'application/x-www-form-urlencoded'
             })
           })
-          .then(response => {
-            line_val = window.location.protocol + "//" + window.location.hostname + "/" + response.headers.get('Compressor')
+          .then(response => response.json())
+          .then(data => {
+            line_val = window.location.protocol + "//" + window.location.hostname + "/" + data.token;
             appendToCookie(file_id, 'compressed', line_val);
           })
 
