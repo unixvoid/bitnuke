@@ -319,7 +319,6 @@ h1 span {
   font-size: 12px;
   color: rgba(201, 201, 201, 0.6);
   font-weight: 400;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: left;
   align-self: flex-start;
@@ -328,6 +327,11 @@ h1 span {
 /* Override uppercase for link URLs */
 .file-status.link-url {
   text-transform: none;
+  letter-spacing: normal;
+}
+
+.file-status .link-url {
+  text-transform: none !important;
   letter-spacing: normal;
 }
 

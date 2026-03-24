@@ -383,7 +383,12 @@
               if (value.timestamp) {
                 var localDate = new Date(value.timestamp);
                 var timeString = localDate.toLocaleString();
-                fileInfoLine += ' <span style="color:rgba(201,201,201,0.6);">| Uploaded: ' + timeString + '</span>';
+                fileInfoLine += ' <span style="color:rgba(201,201,201,0.6);">| UPLOADED: ' + timeString + '</span>';
+              }
+              // Add short link ending if available
+              if (hasShortLink) {
+                var shortLinkPath = shortLink.substring(shortLink.lastIndexOf('/'));
+                fileInfoLine += ' <span class="link-url" style="color:rgba(201,201,201,0.8);">| ' + shortLinkPath + '</span>';
               }
               fileInfoLine += '</span>';
               cardContainer += fileInfoLine;
@@ -399,7 +404,7 @@
               cardContainer += '<span>Copy Link</span>';
               cardContainer += '</button>';
               if (hasShortLink) {
-                cardContainer += '<button class="card-btn secondary-btn copy-link-btn" data-url="' + shortLink.replace(/"/g, "&quot;") + '">';
+                cardContainer += '<button class="card-btn secondary-btn copy-link-btn" data-url="' + shortLink.replace(/"/g, "&quot;") + '" title="' + shortLink.replace(/"/g, "&quot;") + '">';
                 cardContainer += '<i class="material-icons">content_copy</i>';
                 cardContainer += '<span>Copy Short</span>';
                 cardContainer += '</button>';
