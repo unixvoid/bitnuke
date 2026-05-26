@@ -1,8 +1,7 @@
-version: '2'
-
 services:
   nginx:
-    image: unixvoid/nginx:1.19.6
+    image: nginx:1.19.6-alpine
+    command: ["nginx", "-g", "daemon off;", "-c", "/nginx/conf/nginx.conf"]
     restart: always
     volumes:
       - ./nginx/nginx.conf:/nginx/conf/nginx.conf:ro

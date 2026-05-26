@@ -36,7 +36,8 @@ webdev:
 		-v ./deps/nginx/mime.types:/nginx/conf/mime.types:ro \
 		-v ./deps/nginx/data:/nginx/data:ro \
 		-p 8881:80 \
-		unixvoid/nginx:1.19.6
+		nginx:1.19.6-alpine \
+		nginx -g 'daemon off;' -c /nginx/conf/nginx.conf
 	$(OS_PERMS) docker logs -f bitnuke-webdev
 
 stop-webdev:
@@ -52,14 +53,14 @@ docker: clean stat
 
 run-stack:
 	cd deps/ && \
-		$(OS_PERMS) docker-compose up -d && \
-		$(OS_PERMS) docker-compose logs -f
+		$(OS_PERMS) docker compose up -d && \
+		$(OS_PERMS) docker compose logs -f
 restart-stack:
 	cd deps/ && \
-		$(OS_PERMS) docker-compose down && \
+		$(OS_PERMS) docker compose down && \
 		$(OS_PERMS) docker rm `sudo docker ps -aq` 2> /dev/null && \
-		$(OS_PERMS) docker-compose up -d && \
-		$(OS_PERMS) docker-compose logs -f
+		$(OS_PERMS) docker compose up -d && \
+		$(OS_PERMS) docker compose logs -f
 
 stat:
 	mkdir -p bin/
